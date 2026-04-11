@@ -1,0 +1,39 @@
+
+#### Working environment RAG + langchain V 1.0.4 
+
+
+#### Working environment RAG + langchain V 1.0.4 
+chromadb==1.3.4
+langchain==1.0.4
+langchain-classic==1.0.0
+langchain-community==0.4.1
+langchain-core==1.0.4
+langchain-openai==1.0.2
+langchain-text-splitters==1.0.0
+langgraph==1.0.2
+langgraph-checkpoint==3.0.1
+langgraph-prebuilt==1.0.2
+langgraph-sdk==0.2.9
+langsmith==0.4.42
+langchain-experimental
+numpy==2.0.2
+openai==2.7.1
+pandas==2.2.3
+plotly==6.4.0
+pydantic==2.12.4
+pydantic-settings==2.11.0
+pydantic_core==2.41.5
+scikit-learn==1.7.2
+scipy==1.15.3
+tabulate
+
+##WF insights WF39
+joblib
+statsmodels
+scikit-optimize
+scipy
+markupsafe
+flask==3.1.0
+
+pyproj
+
