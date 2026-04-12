@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 xxxx_gemini.md
 summary.md 
-
+node_modules/
+node_modules/*
 # C extensions
 *.so
 
