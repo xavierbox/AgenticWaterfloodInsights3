@@ -1,0 +1,30 @@
+{
+  "dialect": "sqlite",
+  "idioms": [
+    {
+      "topic": "date_aggregation",
+      "rule": "Use strftime() for month/year grouping.",
+      "examples": [
+        "strftime('%Y-%m', DATE)",
+        "strftime('%Y', DATE)"
+      ],
+      "notes": "If DATE is TEXT in 'YYYY-MM-DD' format, SQLite can parse it directly."
+    },
+    {
+      "topic": "conditional_logic",
+      "rule": "Use CASE WHEN for conditional expressions."
+    },
+    {
+      "topic": "string_matching",
+      "rule": "Use LIKE for pattern matching.",
+      "notes": "LIKE is case-sensitive unless COLLATE NOCASE is specified."
+    },
+    {
+      "topic": "safe_division",
+      "rule": "Guard division by zero with CASE WHEN.",
+      "examples": [
+        "CASE WHEN denominator = 0 THEN NULL ELSE numerator * 1.0 / denominator END"
+      ]
+    }
+  ]
+}

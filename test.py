@@ -1,0 +1,93 @@
+
+import os 
+
+#print( os.environ['AZURE_OPENAI_API_KEY'])
+
+
+
+
+
+import uuid,pandas as pd, numpy as np, os,datetime,json,pprint,copy, pickle 
+import json,pprint, time 
+from pydantic import BaseModel, Field
+from uuid import uuid4
+import uuid,pandas as pd, numpy as np, os,datetime,json,pprint,copy, pickle 
+from pydantic import BaseModel, Field
+from typing import List, Optional, Literal
+
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain_core.runnables import RunnableConfig
+from langchain_core.runnables import Runnable
+ 
+from langchain.tools import tool, ToolRuntime
+from langgraph.runtime import get_runtime 
+from langchain.agents import create_agent
+from langchain_core.runnables import RunnableLambda
+
+
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain_core.runnables import RunnableConfig
+from langchain_core.runnables import Runnable
+#from dataiku import pandasutils as pdu
+ 
+from langchain.tools import tool, ToolRuntime
+from langgraph.runtime import get_runtime 
+from langchain.agents import create_agent
+from langchain_core.runnables import RunnableLambda
+import os 
+
+print('imported')
+
+
+def azure_llm_if():
+    from langchain_openai import AzureChatOpenAI
+    endpoint = os.environ['AZURE_OPENAI_ENDPOINT']
+    model_name = "gpt-4o"
+    deployment = "gpt-4"
+    api_version = "2024-12-01-preview"
+    
+    llm = AzureChatOpenAI(
+        azure_deployment=deployment,
+        model=model_name,
+        temperature=0.0,
+        azure_endpoint=endpoint,
+        api_key=os.environ['AZURE_OPENAI_API_KEY'],
+        api_version=api_version,
+    )
+     
+    return llm 
+
+llm = azure_llm_if()
+print( llm )
+
+messages = [
+    ("human", "list 10 countries in latin america and their capital; cities"),
+]
+system_prompt = """
+You are a ReAct-style agent and act as an expert at analyzing geological and production data.
+"""
+
+ 
+agent = create_agent(
+    model=llm,
+    system_prompt=system_prompt,
+    #context_schema=RuntimeContext,
+    #store=InMemoryStore(),
+    #checkpointer = InMemorySaver()      
+)
+print(agent)
+
+
+##########################
+# one way of running it  #
+##########################
+query = "list 5 countries in latin america and their capital cities"
+messages = {
+            "messages": [
+                {"content": query,"role": "user" }
+            ]
+}
+
+response = agent.invoke(messages)
+print("\n--- Agent Final Output ---")
+print( response['messages'][-1:][0].content )

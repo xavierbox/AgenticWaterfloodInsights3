@@ -1,0 +1,237 @@
+{
+  "column_templates": {
+    "DATE": {
+      "data_type": "timestamp",
+      "description": "Timestamp of observation.",
+      "is_categorical": false,
+      "business_rules": [
+        "Represents the observation date/time for the measurement record.",
+        "Should align with YEAR/MONTH/DAY when those date-part columns are present."
+      ]
+    },
+    "NAME": {
+      "data_type": "string",
+      "description": "Well name.",
+      "is_categorical": true,
+      "business_rules": [
+        "Join key used across activity and location tables."
+      ]
+    },
+    "SUBZONE": {
+      "data_type": "string",
+      "description": "Subzone name.",
+      "is_categorical": true,
+      "business_rules": [
+        "Expected values include labels such as LW, RW, UW, Unique."
+      ]
+    },
+    "SECTOR": {
+      "data_type": "integer",
+      "description": "Sector identifier.",
+      "is_categorical": true,
+      "business_rules": [
+        "Should be an integer sector id."
+      ]
+    },
+    "YEAR": {
+      "data_type": "integer",
+      "description": "Year component of DATE.",
+      "is_categorical": false,
+      "business_rules": [
+        "If present, should match the year extracted from DATE."
+      ]
+    },
+    "MONTH": {
+      "data_type": "integer",
+      "description": "Month component of DATE.",
+      "is_categorical": false,
+      "business_rules": [
+        "If present, should match the month extracted from DATE (1-12)."
+      ]
+    },
+    "DAY": {
+      "data_type": "integer",
+      "description": "Day component of DATE.",
+      "is_categorical": false,
+      "business_rules": [
+        "If present, should match the day extracted from DATE."
+      ]
+    }
+  },
+  "tables": [
+    {
+      "name": "injectors",
+      "description": "Time series of water injection activity by injector well.",
+      "column_refs": [
+        "DATE",
+        "NAME",
+        "WATER_INJECTION_VOLUME",
+        "SUBZONE",
+        "SECTOR",
+        "YEAR",
+        "MONTH",
+        "DAY"
+      ],
+      "column_overrides": {
+        "NAME": {
+          "description": "Injector well name.",
+          "business_rules": [
+            "Join key to locations.NAME.",
+            "For valid injector records, matching locations row must have WELL_TYPE = 'Injector'."
+          ]
+        },
+        "WATER_INJECTION_VOLUME": {
+          "data_type": "float",
+          "description": "Injected water volume for the period.",
+          "is_categorical": false,
+          "business_rules": [
+            "Must be non-negative."
+          ]
+        }
+      },
+      "relationships": [
+        {
+          "tables_involved": [
+            "injectors",
+            "locations"
+          ],
+          "join_type": "inner",
+          "join_condition": "injectors.NAME = locations.NAME AND locations.WELL_TYPE = 'Injector'"
+        }
+      ]
+    },
+    {
+      "name": "producers",
+      "description": "Time series of producer well activity.",
+      "column_refs": [
+        "DATE",
+        "NAME",
+        "LIQUID_VOLUME",
+        "WATER_VOLUME",
+        "GAS_VOLUME",
+        "OIL_VOLUME",
+        "SUBZONE",
+        "SECTOR",
+        "YEAR",
+        "MONTH",
+        "DAY"
+      ],
+      "column_overrides": {
+        "NAME": {
+          "description": "Producer well name.",
+          "business_rules": [
+            "Join key to locations.NAME.",
+            "For valid producer records, matching locations row must have WELL_TYPE = 'Producer'."
+          ]
+        },
+        "LIQUID_VOLUME": {
+          "data_type": "float",
+          "description": "Total liquid produced.",
+          "is_categorical": false,
+          "business_rules": [
+            "Must be non-negative.",
+            "Approximately equals WATER_VOLUME + OIL_VOLUME + GAS_VOLUME, allowing small numerical differences."
+          ]
+        },
+        "WATER_VOLUME": {
+          "data_type": "float",
+          "description": "Water produced.",
+          "is_categorical": false,
+          "business_rules": [
+            "Must be non-negative."
+          ]
+        },
+        "GAS_VOLUME": {
+          "data_type": "float",
+          "description": "Gas produced.",
+          "is_categorical": false,
+          "business_rules": [
+            "Must be non-negative."
+          ]
+        },
+        "OIL_VOLUME": {
+          "data_type": "float",
+          "description": "Oil produced.",
+          "is_categorical": false,
+          "business_rules": [
+            "Must be non-negative."
+          ]
+        }
+      },
+      "relationships": [
+        {
+          "tables_involved": [
+            "producers",
+            "locations"
+          ],
+          "join_type": "inner",
+          "join_condition": "producers.NAME = locations.NAME AND locations.WELL_TYPE = 'Producer'"
+        }
+      ]
+    },
+    {
+      "name": "locations",
+      "description": "Static metadata for wells, including both producers and injectors.",
+      "column_refs": [
+        "NAME",
+        "X",
+        "Y",
+        "SUBZONE",
+        "SECTOR",
+        "WELL_TYPE"
+      ],
+      "column_overrides": {
+        "NAME": {
+          "business_rules": [
+            "Primary join key to producers.NAME and injectors.NAME.",
+            "The well name column is always NAME."
+          ]
+        },
+        "X": {
+          "data_type": "float",
+          "description": "X spatial coordinate.",
+          "is_categorical": false,
+          "business_rules": [
+            "Coordinate used for well location mapping."
+          ]
+        },
+        "Y": {
+          "data_type": "float",
+          "description": "Y spatial coordinate.",
+          "is_categorical": false,
+          "business_rules": [
+            "Coordinate used for well location mapping."
+          ]
+        },
+        "WELL_TYPE": {
+          "data_type": "string",
+          "description": "Well category.",
+          "is_categorical": true,
+          "business_rules": [
+            "Allowed values: 'Producer' or 'Injector'.",
+            "Each well is either Producer or Injector, never both.",
+            "Every well in locations must appear in exactly one of producers or injectors."
+          ]
+        }
+      },
+      "relationships": [
+        {
+          "tables_involved": [
+            "locations",
+            "injectors"
+          ],
+          "join_type": "left",
+          "join_condition": "locations.NAME = injectors.NAME AND locations.WELL_TYPE = 'Injector'"
+        },
+        {
+          "tables_involved": [
+            "locations",
+            "producers"
+          ],
+          "join_type": "left",
+          "join_condition": "locations.NAME = producers.NAME AND locations.WELL_TYPE = 'Producer'"
+        }
+      ]
+    }
+  ]
+}
