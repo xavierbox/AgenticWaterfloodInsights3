@@ -1,0 +1,9 @@
+{
+     "duckdb": {
+          "date subtraction": "Use column - INTERVAL 'X days/months'. NEVER use DATE_SUB() or DATEADD().",
+          "date truncation": "Use DATE_TRUNC('month', column).",
+          "reserved keywords": "Always wrap the column name \"DATE\" in double quotes to avoid Binder Errors.",
+          "string concatenation": "Use the || operator or CONCAT().",
+          "boolean aggregation": "Use FILTER clauses or BOOL_OR() / BOOL_AND() for cleaner logic."
+     }
+}

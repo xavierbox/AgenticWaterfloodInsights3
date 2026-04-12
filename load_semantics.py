@@ -10,6 +10,17 @@ def _load_json(path: Path) -> Dict[str, Any]:
         return json.load(f)
 
 
+def load_idiom_rules( idiom = 'duckdb', path = Path('semantics/idioms.json')):
+ 
+    idioms = _load_json( path )
+
+    rules = idioms[ idiom ]
+    context = "\n".join(f"{name}: {detail}" for name, detail in rules.items())
+    return rules, context
+    
+#idioms_path = Path("../semantics/idioms.json")
+#with idioms_path.open() as fh:
+#    idioms = json.load(fh)
 
 
 def load_semantics(base_dir: Path = Path('semantics')) -> tuple[SemanticCatalog, SQLIdiomsCatalog, SemanticContext]:
