@@ -3,6 +3,7 @@
     {
       "name": "injectors",
       "description": "Water-injection time series per injector well, subzone and sector",
+      "kind": "base",
       "columns": [
         {
           "name": "DATE",
@@ -89,6 +90,7 @@
     {
       "name": "producers",
       "description": "Producer well production time series.",
+      "kind":"base",
       "columns": [
         {
           "name": "DATE",
@@ -208,6 +210,7 @@
     {
       "name": "locations",
       "description": "Static well metadata and spatial coordinates.",
+      "kind":"base",
       "columns": [
         {
           "name": "NAME",

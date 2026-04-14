@@ -5,9 +5,9 @@ from typing import List, Optional, Literal
 class ColumnCard(BaseModel):
     name: str = Field(description = 'column name')
     data_type: str 
-    description: str = Field( description = "meaning of the data in the column")
+    description: Optional[str] = Field( default = None, description = "meaning of the data in the column")
     #is_categorical: Optional[bool] = Field(description='True if the column contains categorical values and False otherwise')
-    business_rules: List[str] = Field(default_factory=list, description="Actionable business rules for this column, one rule per item.")
+    #business_rules: List[str] = Field(default_factory=list, description="Actionable business rules for this column, one rule per item.")
 
 class Relationship(BaseModel):
     tables_involved: List[str] = Field(description="Tables participating in the relationship, typically [left_table, right_table].")
@@ -31,6 +31,11 @@ class SQLExample(BaseModel):
 class TableCard(BaseModel):
     name : str = Field( description = "table name")
     description : str = Field( description = "brief description of table contents")
+    kind : Optional[Literal[ 'base', 'derived']] = Field( description = "wheather this is a base table or a derived one")
+    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
+    row_count: Optional[int] = Field(default=None, description = "number of rows")
+
+
     columns: List[ColumnCard] = Field(
         default_factory=list,
         description="Semantic metadata for columns in this table."
@@ -43,6 +48,12 @@ class TableCard(BaseModel):
         default_factory=list,
         description="Representative SQL queries relevant to this table."
     )
+
+class LoadedTableCard( TableCard ):
+    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
+    row_count: Optional[int] = Field(default=None, description = "number of rows")
+
+
 
 class QueryCatalogItem(BaseModel):
     id: str = Field(description="Stable identifier for the query pattern.")
