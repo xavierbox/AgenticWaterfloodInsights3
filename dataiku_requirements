@@ -1,8 +1,9 @@
 
+
+blank 
+lint 
+
 #### Working environment RAG + langchain V 1.0.4 
-
-
-
 duckdb==1.5.1
 joblib==1.5.2
 langchain==1.0.4
@@ -46,6 +47,5 @@ matplotlib
 seaborn
 markupsafe
 flask==3.1.0
-duckdb 
 pyproj
 
