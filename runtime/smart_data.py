@@ -6,7 +6,7 @@ from typing import Any, Dict
 import yaml
 import pandas as pd, numpy as np
 
-from catalog import Catalog
+from runtime.catalog import Catalog
 
 
 class SmartData:
@@ -45,6 +45,22 @@ class SmartData:
         self._catalog.clear()
         self.conn.close()
         self.conn= duckdb.connect()
+
+        
+    def clear_derived( self ):
+        derived_table_names = [
+            name
+            for name, card in self._catalog.tables.items()
+            if card.kind == 'derived'
+        ]
+
+        for name in derived_table_names:
+            try:
+                self.conn.unregister(name)
+            except duckdb.CatalogException:
+                pass
+            self._catalog.tables.pop(name, None)
+
 
     def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], named_table_models ):
         self.clear()
@@ -119,4 +135,3 @@ class SmartData:
 
     def get_table_as_df( self, table_name )->pd.DataFrame:
         return self.conn.execute(f"SELECT * FROM {table_name}").fetchdf()
-

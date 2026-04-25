@@ -2,6 +2,9 @@
 
 blank 
 lint 
+ruff 
+pytest 
+
 
 #### Working environment RAG + langchain V 1.0.4 
 duckdb==1.5.1

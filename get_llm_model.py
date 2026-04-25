@@ -34,12 +34,12 @@ from langgraph.runtime import get_runtime
 from langchain.agents import create_agent
 from langchain_core.runnables import RunnableLambda
 import os 
-
+from langchain_openai import AzureChatOpenAI
 print('imported')
 
 
 def azure_llm_if():
-    from langchain_openai import AzureChatOpenAI
+
     endpoint = os.environ['AZURE_OPENAI_ENDPOINT']
     model_name = "gpt-4o"
     deployment = "gpt-4"
