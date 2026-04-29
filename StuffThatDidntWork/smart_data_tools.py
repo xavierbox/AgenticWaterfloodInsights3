@@ -81,9 +81,13 @@ class SmartDataTools:
             snapshot = self._data.catalog_snapshot(materialized_table_name)
             return f"Observation: table {materialized_table_name} created.\n{snapshot}"
         except Exception as e:
-
-        
-            return "SQL instruction failed" 
+            error_msg = (
+                        f"Observation: Materialization failed for table '{materialized_table_name}'.\n"
+                        f"Error Type: {type(e).__name__}\n"
+                        f"Error Detail: {str(e)}\n"
+                        f"Failed SQL: {sql}\n"
+                    )
+            return error_msg
 
     def _reuse_table(self, table_name:str,table_description:str):
         """Call this function when a table can be reused"""

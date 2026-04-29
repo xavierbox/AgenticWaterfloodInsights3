@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from load_semantics import load_semantics
+from StuffThatDidntWork.load_semantics import load_semantics
 
 
 class TestSemanticLoading(unittest.TestCase):
