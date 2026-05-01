@@ -277,20 +277,5 @@ def planner_prompt_builder( tools:SmartDataTools )->str:
     return prompt 
 
 
-   
-class TableItemAgentResponse(BaseModel):
-    table_name: str = Field(description="Name of a materialized output table")
-    description: str = Field(description="Brief summary of the table contents")
-        
-   
-      
-class AgentTableResponse(BaseModel):
-    # Literal ensures the LLM chooses only these specific strings
-    agent: Literal["analyst"] = Field(
-        default="analyst", 
-        description="The role of the agent. Always 'analyst'."
-    )
-    #text : Optional[str]  = Field(default=None, description="textual response")
-    tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
-    
+
     
