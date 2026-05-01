@@ -1,12 +1,12 @@
 from langchain_core.tools import StructuredTool, Tool
-from agentic.v4.semantic_models import * 
+from runtime.v4.semantics.semantic_models import * 
 from typing import Iterable, Union
 import duckdb
 from typing import Any, Dict
 import yaml
 import pandas as pd, numpy as np
 
-from agentic.v4.catalog import Catalog
+from runtime.v4.analyst_agent.catalog import Catalog
 
 
 class SmartData:
@@ -87,7 +87,8 @@ class SmartData:
 
         return df
     
-    def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], named_table_models ):
+    def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], 
+                                         named_table_models: Dict[str,TableCard] ):
         self.clear()
 
         try:
@@ -102,7 +103,7 @@ class SmartData:
             print( 'exception', str(e))
             self.clear()
             
-    def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None) -> str:
+    def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None) -> CatalogTablesSnapshot:
         """
         Returns schema and description of all tables (base and derived) in the database
         """

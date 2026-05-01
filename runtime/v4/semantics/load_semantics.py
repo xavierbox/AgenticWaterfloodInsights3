@@ -1,8 +1,13 @@
 import json
+import sys 
+sys.path.append("./")
+sys.path.append("../")
+sys.path.append("../../")
+
 from pathlib import Path
 from typing import Any, Dict
 
-from agentic.v4.semantic_models import SemanticCatalog, SemanticContext, SQLIdiomsCatalog
+from runtime.v4.semantics.semantic_models import SemanticCatalog, SemanticContext, SQLIdiomsCatalog
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
@@ -23,25 +28,28 @@ def load_idiom_rules( idiom = 'duckdb', path = Path('semantics/idioms.json')):
 #    idioms = json.load(fh)
 
 
-def load_semantics(base_dir: Path = Path('semantics')) -> tuple[SemanticCatalog, SQLIdiomsCatalog, SemanticContext]:
-    semantic_catalog = SemanticCatalog.model_validate(_load_json(base_dir / 'semantic_models.json'))
-    sql_idioms = SQLIdiomsCatalog.model_validate(_load_json(base_dir / 'sql_idioms.json'))
-    semantic_context = SemanticContext.model_validate(_load_json(base_dir / 'semantic_temporal.json'))
-    return semantic_catalog, sql_idioms, semantic_context
+def load_semantics(full_path: Path ):#= Path('semantics')) -> tuple[SemanticCatalog, SQLIdiomsCatalog, SemanticContext]:
+    semantic_catalog = SemanticCatalog.model_validate(_load_json(full_path))
+    return semantic_catalog
+    #sql_idioms = SQLIdiomsCatalog.model_validate(_load_json(base_dir / 'sql_idioms.json'))
+    #semantic_context = SemanticContext.model_validate(_load_json(base_dir / 'semantic_temporal.json'))
+    #return semantic_catalog, sql_idioms, semantic_context
 
 
 def main() -> None:
-    catalog, idioms, context = load_semantics()
+    catalog = load_semantics( Path("semantic_models.json"))
     print(
         f"Loaded semantics successfully: "
         f"{len(catalog.tables)} tables, "
         f"{len(catalog.query_catalog)} queries, "
-        f"{len(idioms.idioms)} SQL idioms, "
-        f"{len(context.definitions)} definitions."
+        #f"{len(idioms.idioms)} SQL idioms, "
+        #f"{len(context.definitions)} definitions."
     )
 
-    print ( idioms )
+    #print ( idioms )
     print ( catalog.tables )
+    print( catalog.semantic_constraints ) 
 
 if __name__ == '__main__':
+    print(20*'**')
     main()

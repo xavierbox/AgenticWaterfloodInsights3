@@ -10,6 +10,17 @@ class ColumnCard(BaseModel):
     #is_categorical: Optional[bool] = Field(description='True if the column contains categorical values and False otherwise')
     #business_rules: List[str] = Field(default_factory=list, description="Actionable business rules for this column, one rule per item.")
 
+
+class SQLExample(BaseModel):
+    name: str = Field(description="Short name for the SQL example.")
+    purpose: str = Field(description="What this query demonstrates or answers.")
+    sql: str = Field(description="Executable SQL snippet.")
+    notes: Optional[str] = Field(
+        default=None,
+        description="Optional assumptions, caveats, or interpretation guidance."
+    )
+
+
 class Relationship(BaseModel):
     tables_involved: List[str] = Field(description="Tables participating in the relationship, typically [left_table, right_table].")
     join_type: Literal["inner", "left", "right", "full", "cross"] = Field(
@@ -20,14 +31,6 @@ class Relationship(BaseModel):
         description=("SQL join condition, for example \"injectors.NAME = locations.NAME AND locations.WELL_TYPE = 'Injector'\". "))
     description: Optional[str] = Field(default=None,description="Business meaning of this relationship.")
 
-class SQLExample(BaseModel):
-    name: str = Field(description="Short name for the SQL example.")
-    purpose: str = Field(description="What this query demonstrates or answers.")
-    sql: str = Field(description="Executable SQL snippet.")
-    notes: Optional[str] = Field(
-        default=None,
-        description="Optional assumptions, caveats, or interpretation guidance."
-    )
 
 class TableCard(BaseModel):
     name : str = Field( description = "table name")
@@ -50,9 +53,16 @@ class TableCard(BaseModel):
     #    description="Representative SQL queries relevant to this table."
     #) 
 
-class LoadedTableCard( TableCard ):
-    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
-    row_count: Optional[int] = Field(default=None, description = "number of rows")
+class CatalogTablesSnapshot(BaseModel):
+    
+    base_tables: Optional[List[TableCard]] = Field( default=None)
+    derived_tables: Optional[List[TableCard]] = Field( default=None)
+    
+
+
+#class LoadedTableCard( TableCard ):
+#    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
+#    row_count: Optional[int] = Field(default=None, description = "number of rows")
 
 
 

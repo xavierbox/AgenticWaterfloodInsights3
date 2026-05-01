@@ -2,7 +2,7 @@ import sys
 from datetime import datetime 
 from typing import Dict, List, Tuple, Optional, Any 
 from pathlib import Path 
-from agentic.v4.semantic_models import * 
+from runtime.v4.semantics.semantic_models import * 
 from typing import Iterable, Union
 
 from typing import Any, Dict
@@ -14,9 +14,103 @@ class Catalog:
     def __init__(self):
         self.tables: Dict[str, TableCard] = {}
 
+    def snapshot(
+        self,
+        input_tables=None
+    ) -> CatalogTablesSnapshot:
+        """
+        Return structured catalog snapshot.
+
+        Output:
+        CatalogTablesSnapshot(
+            base_tables=[...],
+            derived_tables=[...]
+        )
+        """
+
+        # =====================================================
+        # SELECT TABLES
+        # =====================================================
+
+        if input_tables is None:
+            items = self.tables.values()
+
+        elif isinstance(input_tables, TableCard):
+            items = [input_tables]
+
+        else:
+            items = input_tables
+
+        # =====================================================
+        # OUTPUT CONTAINERS
+        # =====================================================
+
+        base_tables = []
+        derived_tables = []
+
+        # =====================================================
+        # BUILD TABLE CARDS
+        # =====================================================
+
+        for tc in items:
+
+            columns = []
+
+            for c in tc.columns:
+
+                column_card = ColumnCard(
+                    name=c.name,
+                    data_type=c.data_type or "",
+                    semantic_type=getattr(c, "semantic_type", None),
+                    description=c.description if c.description else None,
+                    allowed_values=getattr(c, "allowed_values", None),
+                )
+
+                columns.append(column_card)
+
+            # -----------------------------------------
+            # Preserve created SQL if available
+            # -----------------------------------------
+            created_by_sql = None
+
+            if hasattr(tc, "created_by_sql"):
+                created_by_sql = tc.created_by_sql
+
+            elif getattr(tc, "sql_examples", None):
+                if tc.sql_examples:
+                    created_by_sql = tc.sql_examples[0].sql
+
+            # -----------------------------------------
+            # Build structured table card
+            # -----------------------------------------
+            table_card = TableCard(
+                name=tc.name,
+                description=tc.description,
+                kind=tc.kind or "base",
+                row_count=tc.row_count,
+                columns=columns,
+                created_by_sql=created_by_sql,
+            )
+
+            # -----------------------------------------
+            # Route by type
+            # -----------------------------------------
+            if table_card.kind == "derived":
+                derived_tables.append(table_card)
+
+            else:
+                base_tables.append(table_card)
+
+        # =====================================================
+        # RETURN STRUCTURED SNAPSHOT
+        # =====================================================
+
+        return CatalogTablesSnapshot(
+            base_tables=base_tables if base_tables else None,
+            derived_tables=derived_tables if derived_tables else None,
+        )
             
-            
-    def snapshot(self, input_tables=None) -> dict:
+    def textual_snapshot(self, input_tables=None) -> dict:
 
         if input_tables is None:
             items = self.tables.values()
@@ -105,16 +199,16 @@ class Catalog:
                 #}
 
             # created_by_sql (you already store this in sql_examples or elsewhere?)
-            created_by_sql = None
-            if hasattr(tc, "created_by_sql"):
-                created_by_sql = tc.created_by_sql
-            elif tc.sql_examples:
-                # optional: pick first example as origin
-                created_by_sql = tc.sql_examples[0].sql
+            #created_by_sql = None
+            #if hasattr(tc, "created_by_sql"):
+            #    created_by_sql = tc.created_by_sql
+            #elif tc.sql_examples:
+            #    # optional: pick first example as origin
+            #    created_by_sql = tc.sql_examples[0].sql
 
             out["tables"][tc.name] = {
                 "columns": cols,
-                "created_by_sql": created_by_sql,
+                #"created_by_sql": created_by_sql,
                 "description": tc.description,
                 "kind": tc.kind or "base",
             }
@@ -226,7 +320,7 @@ class Catalog:
             row_count=df.shape[0],
             columns = cols,
             relationships = [] if not kwargs else kwargs.get('relationships', []),
-            sql_examples  = [] if not kwargs else kwargs.get('sql_exampled',  [])
+            #sql_examples  = [] if not kwargs else kwargs.get('sql_exampled',  [])
 
         )
 
@@ -235,7 +329,8 @@ class Catalog:
     def clear(self):
         self.tables = {} 
 
-    def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], named_table_models ):
+    def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], 
+                                         named_table_models:Dict[str,TableCard] ):
         
         self.clear() 
 
@@ -246,7 +341,6 @@ class Catalog:
 
                 dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
                 model.creation_date = str( dt )
-                
                 self.tables[name] = model
             else:
                 raise ValueError(f"Table named {name} is not in the known tables catalog")

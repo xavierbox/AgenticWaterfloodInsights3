@@ -1,5 +1,7 @@
 
-from agentic.v4.smart_data import SmartData
+from runtime.v4.analyst_agent.catalog import * 
+from runtime.v4.analyst_agent.smart_data import SmartData
+
 from typing import Dict, List, Tuple, Optional, Any 
 from langchain_core.tools import StructuredTool, Tool
 from typing import Iterable
@@ -10,7 +12,7 @@ class SmartDataTools:
         self._data = data 
 
     # ----------------------------------------
-    def _record_plan(plan: str) -> str:
+    def _record_plan(self, plan: str) -> str:
         """
         Records the execution plan. Does NOT affect execution.
         """
@@ -19,7 +21,240 @@ class SmartDataTools:
         print("=======================\n")
         return "OK"
 
-    def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None):# -> str:
+    def format_catalog_snapshot(self, snapshot: CatalogTablesSnapshot) -> str:
+        def clean(obj):
+            if isinstance(obj, dict):
+                return {
+                        k: clean(v)
+                        for k, v in obj.items()
+                        if v not in [None, "", [], {}]
+                }
+
+            elif isinstance(obj, list):
+                return [
+                    clean(v)
+                    for v in obj
+                    if v not in [None, "", [], {}]
+                    ]
+
+            return obj
+        
+        import json
+
+        lines = []
+
+        def format_tables(title: str, tables: list[TableCard] | None):
+            if not tables:
+                return
+
+            lines.append(title)
+            lines.append("-" * 60)
+
+            for t in tables:
+                d = json.loads(
+                    t.model_dump_json(
+                        indent=2,
+                        #exclude_unset=True,
+                        exclude_none=True,
+                    )
+                )
+                ## scan all the keys, when values are None, [] or empty, pop them
+                d = clean( d )
+                lines.append(f"\nTable: {d['name']}")
+
+                for k, v in d.items():
+                    if k == "name":
+                        continue
+
+                    if k == "columns":
+                        lines.append("  Columns:")
+                        for c in v:
+                            parts = [f"{ck}: {cv}" for ck, cv in c.items()]
+                            lines.append(f"    - {' | '.join(parts)}")
+
+                    elif k == "relationships":
+                        lines.append("  Relationships:")
+                        for r in v:
+                            parts = [f"{rk}: {rv}" for rk, rv in r.items()]
+                            lines.append(f"    - {' | '.join(parts)}")
+
+                    else:
+                        lines.append(f"  {k}: {v}")
+
+            lines.append("")
+
+        #format_tables("BASE TABLES", snapshot.base_tables)
+        #format_tables("DERIVED TABLES", snapshot.derived_tables)
+        format_tables(" ", snapshot.base_tables)
+        format_tables(" ", snapshot.derived_tables)
+        return "\n".join(lines).strip()
+
+    def catalog_snapshot(
+        self,
+        input_tables: None | str | Iterable[str] = None
+    ) -> str:
+        """
+        Return an LLM-friendly textual snapshot of the data catalog.
+
+        This method is intended to ground agents with the available table
+        schemas, descriptions, columns, and relevant metadata before they plan
+        or execute data tasks.
+
+        Parameters
+        ----------
+        input_tables : None | str | Iterable[str], optional
+            Tables to include in the snapshot.
+
+            - None:
+                Include all tables in the catalog.
+            - str:
+                Include only the table with this name.
+            - Iterable[str]:
+                Include only the listed table names.
+
+        Returns
+        -------
+        str
+            A structured, readable catalog description suitable for use in
+            planner prompts, executor prompts, and schema-grounded reasoning.
+        """
+
+        # =====================================================
+        # GET STRUCTURED SNAPSHOT
+        # =====================================================
+
+        snapshot = self._data.catalog_snapshot(input_tables)
+        return self.format_catalog_snapshot( snapshot )
+
+
+
+
+
+    def old_catalog_snapshot(
+        self,
+        input_tables: None | str | Iterable[str] = None
+    ) -> str:
+        """
+        Returns LLM-friendly textual catalog snapshot.
+
+        Designed for:
+        - planner prompts
+        - executor prompts
+        - schema grounding
+
+        Output:
+        Structured readable text, not raw dict/json.
+        """
+
+        # =====================================================
+        # GET STRUCTURED SNAPSHOT
+        # =====================================================
+
+        snapshot = self._data.catalog_snapshot(input_tables)
+
+        lines = []
+
+        # =====================================================
+        # HEADER
+        # =====================================================
+
+        lines.append("DATABASE CATALOG SNAPSHOT")
+        lines.append("=" * 79)
+
+        # =====================================================
+        # BASE TABLES
+        # =====================================================
+
+        if snapshot.base_tables:
+            lines.append("\nBASE TABLES:")
+            lines.append("-" * 79)
+
+            for table in snapshot.base_tables:
+
+                lines.append(f"\nTable: {table.name}")
+                lines.append(f"Kind: base")
+
+                if table.description:
+                    lines.append(f"Description: {table.description}")
+
+                if table.row_count is not None:
+                    lines.append(f"Row Count: {table.row_count}")
+
+                lines.append("Columns:")
+
+                for col in table.columns:
+
+                    col_line = f"  - {col.name} ({col.data_type}"
+
+                    #if col.semantic_type:
+                    #    col_line += f", semantic: {col.semantic_type}"
+
+                    col_line += ")"
+
+                    if col.description:
+                        col_line += f": {col.description}"
+
+                    lines.append(col_line)
+
+        # =====================================================
+        # DERIVED TABLES
+        # =====================================================
+
+        if snapshot.derived_tables:
+            lines.append("\nDERIVED TABLES:")
+            lines.append("-" * 79)
+
+            for table in snapshot.derived_tables:
+
+                lines.append(f"\nTable: {table.name}")
+                lines.append(f"Kind: derived")
+
+                if table.description:
+                    lines.append(f"Description: {table.description}")
+
+                if table.row_count is not None:
+                    lines.append(f"Row Count: {table.row_count}")
+
+                if getattr(table, "created_by_sql", None):
+                    lines.append(f"Created By SQL: {table.created_by_sql}")
+
+                lines.append("Columns:")
+
+                for col in table.columns:
+
+                    col_line = f"  - {col.name} ({col.data_type}"
+
+                    #if col.semantic_type:
+                    #    col_line += f", semantic: {col.semantic_type}"
+
+                    col_line += ")"
+
+                    if col.description:
+                        col_line += f": {col.description}"
+
+                    lines.append(col_line)
+
+        # =====================================================
+        # GLOBAL RULES
+        # =====================================================
+
+        lines.append("\nGLOBAL RULES:")
+        lines.append("-" * 79)
+        lines.append("- Only listed tables and columns exist.")
+        lines.append("- Never invent tables or columns.")
+        lines.append("- Prefer reuse of derived tables when possible.")
+        lines.append("- Base tables are original datasets.")
+        lines.append("- Derived tables are previously materialized analytical outputs.")
+
+        # =====================================================
+        # FINAL TEXT
+        # =====================================================
+
+        return "\n".join(lines)
+
+
+
+    def old_catalog_snapshot(self, input_tables: None | str | Iterable[str] = None):# -> str:
         """
         Returns an agent-facing catalog snapshot with global SQL rules,
         semantic constraints, and table schemas.
@@ -89,9 +324,6 @@ class SmartDataTools:
 
         return self._data.conn.execute(f'SELECT * FROM "{safe_name}" LIMIT 5').fetchdf()
 
-
-        
-
     def sql_materialize( self, sql:str, materialized_table_name:str, detailed_table_description:str ):
         """
         materialize a table by executing sql and stores it in the database as a 'derived' table.  
@@ -111,7 +343,8 @@ class SmartDataTools:
             self._data.register_derived_table( df_result, materialized_table_name, detailed_table_description)
         
             snapshot = self._data.catalog_snapshot(materialized_table_name)
-            return f"Observation: table {materialized_table_name} created.\n{snapshot}"
+            txt_snapshot = self.format_catalog_snapshot( snapshot )
+            return f"Observation: table {materialized_table_name} created. \n"#\n{txt_snapshot}"
 
         except Exception as e:
             error_msg = (
@@ -121,8 +354,6 @@ class SmartDataTools:
                         f"Failed SQL: {sql}\n"
                     )
             return error_msg
-
-
 
     def reuse_derived_table(self, derived_table_name:str, table_description:str):
         """Call this function to reuse a **derived** table present in the catalog."""
