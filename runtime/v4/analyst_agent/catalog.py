@@ -58,27 +58,27 @@ class Catalog:
 
             for c in tc.columns:
 
-                column_card = ColumnCard(
-                    name=c.name,
-                    data_type=c.data_type or "",
-                    semantic_type=getattr(c, "semantic_type", None),
-                    description=c.description if c.description else None,
-                    allowed_values=getattr(c, "allowed_values", None),
-                )
+                #column_card = ColumnCard(
+                #    name=c.name,
+                #    data_type=c.data_type or "",
+                #    semantic_type=getattr(c, "semantic_type", None),
+                #    description=c.description if c.description else None,
+                #    allowed_values=getattr(c, "allowed_values", None),
+                #)
 
-                columns.append(column_card)
+                columns.append( c )#column_card)
 
             # -----------------------------------------
             # Preserve created SQL if available
             # -----------------------------------------
             created_by_sql = None
 
-            if hasattr(tc, "created_by_sql"):
-                created_by_sql = tc.created_by_sql
+            #if hasattr(tc, "created_by_sql"):
+            #    created_by_sql = tc.created_by_sql
 
-            elif getattr(tc, "sql_examples", None):
-                if tc.sql_examples:
-                    created_by_sql = tc.sql_examples[0].sql
+            #elif getattr(tc, "sql_examples", None):
+            #    if tc.sql_examples:
+            #        created_by_sql = tc.sql_examples[0].sql
 
             # -----------------------------------------
             # Build structured table card
@@ -89,7 +89,7 @@ class Catalog:
                 kind=tc.kind or "base",
                 row_count=tc.row_count,
                 columns=columns,
-                created_by_sql=created_by_sql,
+                #created_by_sql=created_by_sql,
             )
 
             # -----------------------------------------

@@ -43,6 +43,10 @@ def azure_llm_if():
     endpoint = os.environ['AZURE_OPENAI_ENDPOINT']
     model_name = "gpt-4o"
     deployment = "gpt-4"
+
+    #model_name = "gpt-4o-mini"
+    #deployment = "gpt-4o-mini"
+
     api_version = "2024-12-01-preview"
     
     llm = AzureChatOpenAI(

@@ -12,7 +12,7 @@ class SmartDataTools:
         self._data = data 
 
     # ----------------------------------------
-    def _record_plan(self, plan: str) -> str:
+    def record_plan(self, plan: str) -> str:
         """
         Records the execution plan. Does NOT affect execution.
         """
@@ -125,10 +125,6 @@ class SmartDataTools:
 
         snapshot = self._data.catalog_snapshot(input_tables)
         return self.format_catalog_snapshot( snapshot )
-
-
-
-
 
     def old_catalog_snapshot(
         self,
@@ -253,7 +249,6 @@ class SmartDataTools:
         return "\n".join(lines)
 
 
-
     def old_catalog_snapshot(self, input_tables: None | str | Iterable[str] = None):# -> str:
         """
         Returns an agent-facing catalog snapshot with global SQL rules,
@@ -276,14 +271,14 @@ class SmartDataTools:
         """Returns a brief textual description of the tables"""
         return self._data.get_tables_brief_description() 
 
-    def get_tools(self, include_planning_tools: bool = False):
+    def get_tools(self):#, include_planning_tools: bool = False):
         tools = []
-        planning_tools = {"record_step_by_step_plan", "emit_step_by_step_plan"}
+        #planning_tools = {"record_step_by_step_plan", "emit_step_by_step_plan"}
         for name in dir(self):
             if name.startswith("_") or name == "get_tools":
                 continue
-            if not include_planning_tools and name in planning_tools:
-                continue
+            #if not include_planning_tools and name in planning_tools:
+            #    continue
                 
             attr = getattr(self, name)
             if not attr.__doc__:
