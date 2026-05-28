@@ -1,3 +1,8 @@
+raise ImportError(
+    f"Test file '{__name__}' in package '{__package__}' is not meant to be run directly."
+)
+
+
 from langchain_core.tools import StructuredTool, Tool
 from semantics.semantic_models import * 
 from typing import Iterable, Union

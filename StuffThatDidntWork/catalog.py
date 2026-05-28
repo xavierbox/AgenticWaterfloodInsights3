@@ -1,3 +1,8 @@
+raise ImportError(
+    f"Test file '{__name__}' in package '{__package__}' is not meant to be run directly."
+)
+
+
 import sys 
 from datetime import datetime 
 from typing import Dict, List, Tuple, Optional, Any 

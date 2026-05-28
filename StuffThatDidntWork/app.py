@@ -1,4 +1,9 @@
 
+raise ImportError(
+    f"Test file '{__name__}' in package '{__package__}' is not meant to be run directly."
+)
+
+
 from pathlib import Path
 from typing import Any, Dict
 import json

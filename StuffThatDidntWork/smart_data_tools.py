@@ -1,3 +1,6 @@
+raise ImportError(
+    f"Test file '{__name__}' in package '{__package__}' is not meant to be run directly."
+)
 
 from runtime.smart_data import SmartData
 from typing import Dict, List, Tuple, Optional, Any 
