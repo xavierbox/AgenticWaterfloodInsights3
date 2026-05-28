@@ -29,6 +29,26 @@ class AgentTableResponse(BaseModel):
         default="analyst", 
         description="The role of the agent. Always 'analyst'."
     )
+    #response_type: Literal["table","text","question","table+text"] = Field(
+    #    description="The type of response: 'table' for tabular data, 'text' for textual summaries, and 'question' for follow-up questions."
+    #) 
+
+    question: Optional[str] = Field(default=None, description="A follow-up question if the response_type is 'question'")
+
+    text: Optional[str]  = Field(default=None, description="A textual response summarizing small tables.")
+
+    user_query: str = Field( description='sanitized user query')
+    tables: List[TableItemAgentResponse] = Field(default=[], description="Comma-separated list of table names")
+
+    #text : Optional[str]  = Field(default=None, description="textual response summarizing small tables")
+    #tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
+   
+class AgentTableResponse1(BaseModel):
+    # Literal ensures the LLM chooses only these specific strings
+    agent: Literal["analyst"] = Field(
+        default="analyst", 
+        description="The role of the agent. Always 'analyst'."
+    )
     user_query: str = Field( description='sanitized user query')
     tables: List[TableItemAgentResponse] = Field(default=[], description="Comma-separated list of table names")
 

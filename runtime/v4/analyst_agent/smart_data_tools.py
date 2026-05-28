@@ -303,7 +303,10 @@ class SmartDataTools:
         return tools
     
     def materialize_select( self, table_name, rows )->str:
-        """Return a full table to produce a textual response. Dont call this unless the table has less than 10 rows"""
+        """
+        Return a full table to produce a textual response. 
+        **Do not call this tool ** unless the table has less than 20 rows
+        """
         #return self._conn.execute(f'SELECT * FROM "{table_name}"').fetchdf()
         if not table_name:
             return "table_name cannot be empty"
@@ -323,8 +326,8 @@ class SmartDataTools:
 
         # Safe quoting for table names
         safe_name = table_name.replace('"', '""')
-
-        return self._data.conn.execute(f'SELECT * FROM "{safe_name}" LIMIT 5').fetchdf()
+        limit = min(20, int(rows))
+        return self._data.conn.execute(f'SELECT * FROM "{safe_name}" LIMIT {limit}').fetchdf().to_string()
 
     def sql_materialize( self, sql:str, materialized_table_name:str, detailed_table_description:str ):
         """
@@ -335,8 +338,9 @@ class SmartDataTools:
             detailed_table_description: detailed description of the resulting table  
 
         Returns:
-            Message indicating that the table was generated and stored or a message indicating failure when an error occured
-            This tool will  never return a table 
+            Message indicating that the table was generated and stored or a message indicating 
+            failure when an error occured
+            If the resulting table is small, also returns a string preview of the table.
         """
         retries = 0 
 
@@ -346,7 +350,19 @@ class SmartDataTools:
         
             snapshot = self._data.catalog_snapshot(materialized_table_name)
             txt_snapshot = self.format_catalog_snapshot( snapshot )
-            return f"Observation: table {materialized_table_name} created. \n"#\n{txt_snapshot}"
+            n_rows, n_cols = df_result.shape
+
+            table_preview = ""
+            if n_rows < 10 and n_cols < 5:
+                table_preview = f"Table {materialized_table_name} preview:\n{df_result.to_string(index=True)}\n"
+                
+
+            return (
+                        f"Observation: table {materialized_table_name} created.\n"
+                        f"\n{txt_snapshot}\n"
+                        f"{table_preview}"
+                    )
+            #return f"Observation: table {materialized_table_name} created.\nTable metadata:\n{txt_snapshot}\n"
 
         except Exception as e:
             error_msg = (
