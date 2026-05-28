@@ -1,4 +1,7 @@
+from __future__ import annotations
 from langchain_core.tools import StructuredTool, Tool
+#from StuffThatDidntWork import smart_data
+#from StuffThatDidntWork import smart_data
 from runtime.v4.semantics.semantic_models import * 
 from typing import Iterable, Union
 import duckdb
@@ -7,13 +10,35 @@ import yaml
 import pandas as pd, numpy as np
 
 from runtime.v4.analyst_agent.catalog import Catalog
-
+from runtime.v4.analyst_agent.smart_data_tools  import SmartDataTools
 
 class SmartData:
 
     def __init__(self):
         self._catalog = Catalog() 
         self.conn= duckdb.connect()
+
+    def get_table_tools(self):
+        """
+        Return a SmartDataTools instance bound to this SmartData object.
+        Creates it lazily and reuses the same instance.
+        """
+        
+        smart_tools = SmartDataTools(self)
+        return smart_tools
+
+    def get_tools(self):
+        return self.get_agent_tools()
+    
+    def get_agent_tools(self):
+        """
+        Return a SmartDataTools instance bound to this SmartData object.
+        Creates it lazily and reuses the same instance.
+        """
+        
+        smart_tools = SmartDataTools(self)
+        return smart_tools.get_tools()
+
 
     def _normalize_sql(self, sql: str) -> str:
         lines = sql.strip().splitlines()
@@ -43,10 +68,14 @@ class SmartData:
 
     def clear( self ):
         self._catalog.clear()
+        #self.conn.close()
+        #self.conn= duckdb.connect()
+        self.restart_connection()
+
+    def restart_connection( self ):
         self.conn.close()
         self.conn= duckdb.connect()
 
-        
     def clear_derived( self ):
         derived_table_names = [
             name
@@ -60,7 +89,6 @@ class SmartData:
             except duckdb.CatalogException:
                 pass
             self._catalog.tables.pop(name, None)
-
 
     def sanitize_df(self, df):
 
@@ -87,22 +115,45 @@ class SmartData:
 
         return df
     
-    def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], 
-                                         named_table_models: Dict[str,TableCard] ):
-        self.clear()
-
+    def set_data( self,df_dict: Dict[str,pd.DataFrame]):
         try:
-            conn = self.conn
-            self._catalog.initialize_from_named_dataframes( df_dict, named_table_models )
-            
+            self.restart_connection()
+            self._catalog.set_data( df_dict )
+  
             for name, df in df_dict.items():
                 df = self.sanitize_df(df)
+                self.conn.register(name, df)
+
+        except Exception as e:
+            print("exception", str(e))
+            self.clear()
+            raise
+
+    @staticmethod
+    def initialize_from_named_dataframes(
+        df_dict: Dict[str, pd.DataFrame],
+        named_table_models: Dict[str, TableCard],
+    ):
+        smart_data = SmartData()
+
+        try:
+            conn = smart_data.conn
+            smart_data._catalog.initialize_from_named_dataframes(
+                df_dict,
+                named_table_models,
+            )
+
+            for name, df in df_dict.items():
+                df = smart_data.sanitize_df(df)
                 conn.register(name, df)
 
         except Exception as e:
-            print( 'exception', str(e))
-            self.clear()
-            
+            print("exception", str(e))
+            smart_data.clear()
+            raise
+
+        return smart_data
+
     def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None) -> CatalogTablesSnapshot:
         """
         Returns schema and description of all tables (base and derived) in the database
@@ -121,8 +172,6 @@ class SmartData:
         card = Catalog.dataframe_to_table_card( df, name, table_description, 'derived' )
         self._catalog.register_table( card )
         self.conn.register(name, df)
-
-
 
     def get_table_names( self ):
         """Returns the table names"""

@@ -122,6 +122,15 @@ Do not mention internal graph mechanics unless necessary.
 # ============================================================
 # Helpers
 # ============================================================
+from functools import wraps
+
+def make_llm_calling_node(node, llm):
+    @wraps(node)
+    def wrapped_node(state):
+        return node(state, llm=llm)
+
+    return wrapped_node
+
 
 def get_current_task(state: ExecutorState) -> Task:
     plan = state["plan"]
@@ -173,7 +182,7 @@ def make_dummy_node_update(
 # Nodes
 # ============================================================
 
-def planner_node(state: ExecutorState) -> dict:
+def planner_node(state: ExecutorState,llm) -> dict:
     messages = [
         {
             "role": "system",
@@ -325,7 +334,7 @@ Output:
     }
 
 
-def presenter_node(state: ExecutorState) -> dict:
+def presenter_node(state: ExecutorState,llm) -> dict:
     aggregated_context = state["aggregated_context"]
 
     if aggregated_context is None:

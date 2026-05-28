@@ -331,7 +331,6 @@ class Catalog:
 
     def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], 
                                          named_table_models:Dict[str,TableCard] ):
-        
         self.clear() 
 
         for name,df in df_dict.items():
@@ -345,6 +344,29 @@ class Catalog:
             else:
                 raise ValueError(f"Table named {name} is not in the known tables catalog")
        
+    def set_data(self,  df_dict: Dict[str,pd.DataFrame]):
+        """
+        Sets the new tables (data) assuming that the semantic model is already stored.
+        Useful when chaning the project dataset, while still having the same table structure.
+        Note that all derived tables will be lost.
+        """
+        temporal = {}
+        for name, df in df_dict.items():
+            if name not in self.tables:
+                raise ValueError(f"Table named {name} is not in the known tables catalog")
+
+            model = self.tables[name]
+            model.row_count = df.shape[0]
+
+            dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
+            model.creation_date = str( dt )
+            temporal[name] = model
+
+        self.tables = temporal 
+
+
+
+
     def register_table(self, table_card: TableCard ):
         dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
              

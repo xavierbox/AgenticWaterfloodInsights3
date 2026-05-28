@@ -32,7 +32,7 @@ class AgentTableResponse(BaseModel):
     user_query: str = Field( description='sanitized user query')
     tables: List[TableItemAgentResponse] = Field(default=[], description="Comma-separated list of table names")
 
-    #text : Optional[str]  = Field(default=None, description="textual response")
+    #text : Optional[str]  = Field(default=None, description="textual response summarizing small tables")
     #tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
     
     

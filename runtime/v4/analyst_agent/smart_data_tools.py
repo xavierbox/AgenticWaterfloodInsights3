@@ -1,10 +1,17 @@
-
+from __future__ import annotations
 from runtime.v4.analyst_agent.catalog import * 
-from runtime.v4.analyst_agent.smart_data import SmartData
+#from runtime.v4.analyst_agent.smart_data import SmartData
 
 from typing import Dict, List, Tuple, Optional, Any 
 from langchain_core.tools import StructuredTool, Tool
 from typing import Iterable
+ 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from runtime.v4.analyst_agent.smart_data import SmartData
+
+
 
 class SmartDataTools:
 
@@ -273,7 +280,7 @@ class SmartDataTools:
 
     def get_tools(self):#, include_planning_tools: bool = False):
         tools = []
-        #planning_tools = {"record_step_by_step_plan", "emit_step_by_step_plan"}
+        
         for name in dir(self):
             if name.startswith("_") or name == "get_tools":
                 continue

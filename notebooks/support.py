@@ -76,33 +76,68 @@ def run_agent_stream_values(agent, messages):
     print("\n--- STREAM ENDED ---")
     return last_state
 
-query1 = "how many wells are there?"
-query2 = "What is the total water injection volume by year?"
-query3 = "Tell me the mean yearly water injection volume for each subzone"
-query4 = "rank wells by their variability (std) in water injection volume (the higher the grater the rank)?"
-query5 = "whats the frequency of observations in the dataset (D, M, Y) ?"
-query6 = "summarize the injection data"
-query7 = "Which well had the single highest WATER_INJECTION_VOLUME reading at any point in time and what was that reading?"
-query8 = "What is the average monthly injection volume per well grouped by NAME and MONTH?"
-query9 = """For each SUBZONE compute the year-over-year percentage change in total injection 
-volume and report the largest drop
-"""
-query1 = "how many wells are there?"
-query1_2 = "what proportion of those are injectors"
-query2 = "What is the total water injection volume by year?"
-query3 = "Tell me the total water injection volume for each subzone each year"
-query4 = "rank wells by their variability (std) in water injection volume (the higher the grater the rank)?"
-query4_1 = "whats the highest ranked well?"
-query5 = "whats the frequency of observations in the dataset (D, M, Y) ?"
-query6 = "summarize the injection data"
-query7 = "Which well had the single highest WATER_INJECTION_VOLUME reading at any point in time and what was that reading?"
-query8 = "What is the average monthly injection volume per well grouped by NAME and MONTH?"
-query9 = """For each SUBZONE compute the year-over-year percentage change in total injection 
-volume and report the largest drop
-"""
-query10 = "For each injector well, calculate its total water injection volume and join it with the well location information. Return a table with the well name, total injected water, latitude, longitude, and any available location/type fields."
-query11="Create two separate tables: one ranking injector wells by total water injection volume, and another ranking producer wells by total oil production volume."
- 
+def run_agent_stream_values(
+    agent,
+    messages,
+    *,
+    recursion_limit=20,
+    max_content_chars=1200,
+    skip_tool_names={"catalog_snapshot"},
+    skip_large_content=True,
+):
+    config = {"recursion_limit": recursion_limit}
+
+    last_seen = 0
+    last_state = None
+
+    for state in agent.stream(
+        messages,
+        config=config,
+        stream_mode="values",
+    ):
+        last_state = state
+
+        msgs = state.get("messages", [])
+
+        for msg in msgs[last_seen:]:
+            name = getattr(msg, "name", None)
+            content = getattr(msg, "content", None) or ""
+            tool_calls = getattr(msg, "tool_calls", None)
+
+            # skip tool output from catalog_snapshot
+            if name in skip_tool_names:
+                print(f"\n--- skipped tool output: {name} ---")
+                continue
+
+            # skip very large content blocks
+            if skip_large_content and len(content) > max_content_chars * 3:
+                print(f"\n--- {type(msg).__name__} ---")
+                print("name:", name)
+                print(f"[large content skipped: {len(content)} chars]")
+                continue
+
+            print(f"\n--- {type(msg).__name__} ---")
+            print("name:", name)
+
+            if content.strip():
+                print(content[:max_content_chars])
+
+            if tool_calls:
+                for tc in tool_calls:
+                    tool_name = tc.get("name")
+                    args = tc.get("args")
+
+                    print("TOOL CALL:", tool_name)
+
+                    if tool_name in skip_tool_names:
+                        print("ARGS: [skipped]")
+                    else:
+                        print("ARGS:", args)
+
+        last_seen = len(msgs)
+
+    print("\n--- STREAM ENDED ---")
+    return last_state
 
 iii = """I want to compare the liquid production cummulated among wells for which the 
 distance to the closes injected is in the range 0-400, 400-800, 800-1200  . Only year 2018 
