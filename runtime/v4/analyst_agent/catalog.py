@@ -89,6 +89,8 @@ class Catalog:
                 kind=tc.kind or "base",
                 row_count=tc.row_count,
                 columns=columns,
+                creation_date=tc.creation_date,
+                #relationships=tc.relationships if hasattr(tc, "relationships") else None,   
                 #created_by_sql=created_by_sql,
             )
 
@@ -329,9 +331,25 @@ class Catalog:
     def clear(self):
         self.tables = {} 
 
+    def initialize_from_semantic_model( self, named_table_models:Dict[str,TableCard] ):
+        return self.init_from_semantic_models( named_table_models )
+    
+    def init_from_semantic_models( self, named_table_models:Dict[str,TableCard] ):
+        self.clear()   
+
+        for name,model in named_table_models.items():
+                            
+            dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
+            model.creation_date = str( dt )
+            self.tables[name] = model
+            
     def initialize_from_named_dataframes( self, df_dict: Dict[str,pd.DataFrame], 
                                          named_table_models:Dict[str,TableCard] ):
         self.clear() 
+        self.initialize_from_semantic_model( named_table_models )
+        self.set_data( df_dict )
+
+        return 
 
         for name,df in df_dict.items():
             model = named_table_models.get(name, None)
@@ -351,15 +369,19 @@ class Catalog:
         Note that all derived tables will be lost.
         """
         temporal = {}
+        dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
+        creation_date = str( dt )
+
+
         for name, df in df_dict.items():
             if name not in self.tables:
                 raise ValueError(f"Table named {name} is not in the known tables catalog")
 
             model = self.tables[name]
             model.row_count = df.shape[0]
-
-            dt = datetime.now() if hasattr(datetime, "now") else datetime.datetime.now()  
-            model.creation_date = str( dt )
+            model.creation_date = creation_date
+          
+            #print('catalog setting',name, model.creation_date, model.row_count)
             temporal[name] = model
 
         self.tables = temporal 

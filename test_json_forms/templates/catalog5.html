@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Waterflood Insights Analytics</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+<style>
+    .hidden {
+  display: none !important;
+}
+        .tela-logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00e0ff, #1532ff 55%, #00d084);
+    }
+
+    :root[data-theme="light"] {
+--projects-component-left-backgound:
+linear-gradient(
+  160deg,
+  color-mix(in srgb, var(--background-color) 70%, var(--primary-color)) 0%,
+  var(--primary-color) 35%,
+  var(--secondary-color) 100%
+);
+    
+    --background-color: white;
+    --tint-color: smokewhite;
+    --primary-color: rgb(0,0,220);
+    --secondary-color: lightblue;
+    --contrast-color: rgb(255,123,0);
+    --hover-color: lightblue;
+
+    --text-on-primary-color: white;
+    --text-color: rgb(5,5,47);
+
+    --pane-color: white;
+    --pane-bg: white;
+    --pane-border: lightgrey;
+    --bg-gradient: linear-gradient(180deg,white, white); /*#ffffff,#f6f6f6);*/
+    
+    --card-color: white;
+
+    --input-background-color: white; /*rgb(192,192,193);*/
+    --input-text-color: black;
+
+    --separator-color: lightgrey;
+    --separator-hover-color: black;
+    
+    --card-gradient-start: white; /*ffffff;*/
+    --card-gradient-end:  white; /* dfe8f7;*/
+    
+    --fit-poor-bg: #ff7a7a;     /* much lighter red for contrast */
+    --fit-poor-text: #1E1E1E;    
+    
+ --injector-producer-table-bg: white; 
+    
+    --info-card-border: lightgrey;
+    
+    
+}
+
+/* DARK THEME */
+:root[data-theme="dark"] {
+
+--projects-component-left-backgound:
+linear-gradient(
+  160deg,
+  color-mix(in srgb, var(--background-color) 40%, var(--contrast-color)) 10%,
+  var(--primary-color) 45%,
+  var(--hover-color) 100%
+);
+    
+    
+    
+    --background-color: rgb(6,6,6);
+    --tint-color: rgb(41,37,37);
+    --primary-color: rgb(8,8,10);
+    --secondary-color: rgb(59,55,55);
+    --contrast-color: rgb(244,103,2);
+    --hover-color: #0d6efd;
+
+    --text-on-primary-color: rgb(174,171,171);
+    --text-color: rgb(197,194,194);
+
+    --pane-color: rgb(28,24,24);
+    --card-color: rgb(45,43,43);
+
+    --input-background-color: rgb(18,17,17);
+    --input-text-color: rgb(202,200,200);
+
+    --separator-color: rgb(78,70,70);
+    --separator-hover-color: var(--hover-color);
+    
+    --card-gradient-start: #3a3a3a;
+    --card-gradient-end: #121212;
+    
+    --fit-poor-bg: #8b0000;     /* much darker red for contrast */
+    --fit-poor-text: #ffffff;
+    --bg-gradient:
+    radial-gradient(circle at 20% 10%, #111 0%, transparent 40%),
+    linear-gradient(180deg,#0a0a0a,#020202);
+
+        --pane-bg: rgb(28,24,24);
+    --pane-border: rgb(78,70,70);
+    
+     --injector-producer-table-bg: rgb(45,43,43);
+      --info-card-border: rgb(78,70,70);
+}
+
+
+/*neon-blue"*/
+:root[data-theme="neon-light"]{
+
+    --projects-component-left-backgound: transparent;/*
+linear-gradient(
+  160deg,
+  color-mix(in srgb, var(--background-color) 40%, var(--hover-color)) 10%,
+  var(--primary-color) 45%,
+  var(--secondary-color) 100%
+);*/
+    
+    
+    /* BACKGROUND */
+    --bg-gradient:
+        radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
+        radial-gradient(circle at 80% 80%, #00c6ff 0%, transparent 40%),
+        linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
+
+    /* SURFACES (glass panels) */
+    --glass-bg: rgba(12, 28, 78, 0.55);
+    --glass-border: rgba(255,255,255,0.15);
+
+    /* CARD */
+
+
+    --separator-color: rgb(78,70,70);
+    --separator-hover-color: var(--hover-color);
+    
+    /* ACCENTS */
+    /*--primary-color: #3b82f6;*/
+    --primary-color: rgb(8,8,10);
+    
+    --accent-color: #00e5ff;
+    /*--hover-color: #5aa2ff;*/
+        --hover-color: #0d6efd;
+    
+    --input-background-color: white; /*rgb(192,192,193);*/
+    --input-text-color: black;
+        --fit-poor-bg: #8b0000;     /* much darker red for contrast */
+    --fit-poor-text: #ffffff;
+
+    /* TEXT */
+    --text-color: #e6ecff;
+    --text-muted: #9bb4ff;
+
+    /* INPUTS */
+    --input-bg: rgba(255,255,255,0.08);
+    
+ --background-color: #001c5c;
+    --pane-color: var(--glass-bg);
+    --pane-bg: var(--glass-bg);
+    --pane-border: var(--glass-border);
+
+    --card-gradient-start: #102a7a;
+    --card-gradient-end: #001b52;
+    --card-color: #102a7a;
+        --card-bg: linear-gradient(135deg,#102a7a,#001b52);
+    --card-glow: 0 0 20px rgba(70,120,255,0.35);
+    
+
+    --separator-hover-color: #5aa2ff;
+        
+    --injector-producer-table-bg: transparent;
+    
+ 
+    --info-card-border: var(--glass-border);
+}
+
+:root[data-theme="neon-dark"] {
+    --projects-component-left-backgound:transparent; 
+    
+    --background-color: rgb(6,6,6);
+    --tint-color: rgb(41,37,37);
+    --primary-color: rgb(8,8,10);
+    --secondary-color: rgb(59,55,55);
+    --contrast-color: rgb(244,103,2);
+    --hover-color: #0d6efd;
+
+    --text-on-primary-color: rgb(174,171,171);
+    --text-color: rgb(197,194,194);
+
+    --pane-color: var(--glass-bg);
+    --pane-bg: var(--glass-bg);
+    --pane-border: var(--glass-border);
+    
+    --card-color: rgb(45,43,43);
+
+    --input-background-color: rgb(18,17,17);
+    --input-text-color: rgb(202,200,200);
+
+    --separator-color: rgb(78,70,70);
+    --separator-hover-color: rgb(156,156,156);
+
+    --card-gradient-start: #1f2f70;
+    --card-gradient-end: #060a22;
+
+    --card-glow:
+        0 0 18px rgba(0,120,255,0.45),
+        0 0 35px rgba(0,255,210,0.25);
+
+    --card-bg: linear-gradient(135deg,#102a7a,#001b52);
+    
+    --fit-poor-bg: #8b0000;
+    --fit-poor-text: #ffffff;
+
+    /*--bg-gradient:
+    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
+    radial-gradient(circle at 80% 80%, #00635a 0%, transparent 40%),
+    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
+    */
+    
+    
+    /*kinematic*/
+    --bg-gradient:
+    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
+    radial-gradient(circle at 80% 80%, #4b0082 0%, transparent 40%),
+    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
+
+    
+    
+    /*
+    --bg-gradient:
+    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
+    radial-gradient(circle at 80% 80%, #3b006e 0%, transparent 40%),
+    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
+    */
+
+    
+    /*--bg-gradient:
+    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
+    radial-gradient(circle at 80% 80%, #007a6e 0%, transparent 40%), 
+    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);*/
+    
+
+    
+    /*--bg-gradient:
+        radial-gradient(circle at 15% 18%, rgba(0,120,255,0.55) 0%, transparent 38%),
+        radial-gradient(circle at 82% 80%, rgba(0,255,210,0.35) 0%, transparent 40%),
+        radial-gradient(circle at 50% 60%, rgba(90,0,255,0.25) 0%, transparent 45%),
+        linear-gradient(180deg, #02030b, #000000);*/
+    
+    
+    --injector-producer-table-bg: transparent;
+       --info-card-border: rgba(0,255,210,0.25);;
+}
+
+</style>
+<style>
+  :root {
+    --wf-bg: #f6f8fc;
+    --wf-card-bg: #ffffff;
+    --wf-border: #dfe5f1;
+    --wf-text: #1d2b44;
+    --wf-muted: #6c7a92;
+    --wf-blue: #2563eb;
+    --wf-blue-soft: #eef4ff;
+    --wf-red: #8b0000;
+    --wf-shadow: 0 8px 24px rgba(29, 43, 68, 0.08);
+  }
+
+
+
+  
+.pane{
+    background: var(--pane-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid var(--pane-border);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+ 
+
+
+.card{
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--pane-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /*background: linear-gradient(
+        135deg,
+        var(--card-gradient-start),
+        var(--card-gradient-end)
+    ) !important;*/
+    
+    /*background: linear-gradient(
+        140deg,
+        var(--card-gradient-start),
+        var(--card-gradient-end)
+    ) !important;*/
+    
+
+    color: var(--text-color) !important;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    transition: all 0.2s ease;
+}
+
+.card:hover{
+    transform: translateY(-2px)!important;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.35)!important;
+    border-color: var(--hover-color) !important;
+}
+
+
+
+charts-catalog-control {
+  /*flex: 1 1 auto;*/
+  height: 90vh;/*%;*/
+  min-height: 0;
+  display: block;
+}
+  .wf-page {
+    /*height: 100vh;*/
+    overflow: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .wf-header {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px;
+  }
+
+  .wf-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--text-color);
+    font-size: 18px;
+  }
+
+  .wf-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+  }
+
+  .wf-subtitle {
+    color: var(--wf-muted);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: -4px;
+  }
+
+  .wf-main-grid {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: 1.05fr 1.25fr 0.95fr;
+    gap: 12px;
+  }
+
+  .xxwf-panel {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /*background: var(--wf-card-bg);
+    border: 1px solid var(--wf-border);
+    border-radius: 12px;
+    box-shadow: var(--wf-shadow);*/
+  }
+
+  .wf-panel-header {
+    flex: 0 0 auto;
+    padding: 14px 16px 8px 16px;
+    /*font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;*/
+    color: var(--text-color);
+  }
+
+  .wf-panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 10px 14px;
+  }
+
+  .charts-catalog-catalog-area {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    /*background-color: red;*/
+  }
+
+ 
+
+  .wf-filter-placeholder {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .wf-filter-chip {
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--wf-muted);
+   color: var(--text-color);
+    background: transparent;/* #f3f6fb;*/
+  }
+
+.wf-filter-chip:hover{
+  border-bottom: 1px solid var(--wf-blue);
+  
+}
+  .wf-filter-chip.active {
+    /*color: white;*/
+    border-bottom: 1px solid var(--wf-blue);
+    /*background: var(--wf-blue);*/
+  }
+
+  .charts-catalog-list-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .charts-catalog-special-card {
+    flex: 0 0 auto;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid var(--hover-color) !important;
+    /*border: 1px solid var(--wf-border);*/
+    border-radius: 10px;
+    /*background: #ffffff;*/
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s ease;
+  }
+
+  .charts-catalog-special-card:hover {
+    border-color: var(--hover-color) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+    background: var(--secondary-color);
+  }
+
+  .charts-catalog-special-button {
+    border: 1px solid var(--wf-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 800;
+    color: var(--wf-blue);
+    background: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .charts-catalog-special-text {
+    font-size: 12px;
+    color: var(--wf-muted);
+    line-height: 1.25;
+  }
+
+  .charts-catalog-card {
+    flex: 0 0 auto;
+    cursor: pointer;
+    border: 1px solid var(--wf-border);
+    border-radius: 10px;
+    background: white;
+    transition: 0.15s ease;
+    padding: 10px;
+  }
+
+  .charts-catalog-card:hover {
+    border-color: var(--wf-blue);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+  }
+
+  .charts-catalog-card.selected {
+    border: 2px solid var(--wf-blue);
+    background: var(--wf-blue-soft);
+  }
+
+  .charts-catalog-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .charts-catalog-card-title {
+    font-weight: 800;
+    color: var(--wf-blue);
+    font-size: 13px;
+  }
+
+  .charts-catalog-card-description {
+    margin: 6px 0 0 26px;
+    color: var(--wf-muted);
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .charts-catalog-description-box {
+    color: var(--wf-muted);
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .charts-catalog-section-title {
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin: 12px 0 8px 0;
+  }
+
+  .charts-catalog-parameter-editor {
+    font-size: 0.8rem;
+  }
+
+  .charts-catalog-parameter-editor .form-group {
+    display: grid !important;
+    grid-template-columns: 120px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    margin-bottom: 6px !important;
+  }
+
+  .charts-catalog-parameter-editor label {
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .charts-catalog-parameter-editor input,
+  .charts-catalog-parameter-editor select,
+  .charts-catalog-parameter-editor textarea {
+    min-height: 28px !important;
+    padding: 3px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .charts-catalog-parameter-editor .form-text,
+  .charts-catalog-parameter-editor small,
+  .charts-catalog-parameter-editor .help-block {
+    grid-column: 2;
+    font-size: 0.7rem !important;
+    margin: 0 !important;
+  }
+
+  .charts-catalog-parameter-editor .card,
+  .charts-catalog-parameter-editor .card-body {
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  .charts-catalog-parameter-editor .je-header span,
+  .charts-catalog-parameter-editor h3 span,
+  .charts-catalog-parameter-editor h4 span,
+  .charts-catalog-parameter-editor .card-title span {
+    display: none !important;
+  }
+
+  .charts-catalog-actions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 14px 0;
+  }
+
+  .charts-catalog-preview-label {
+    display: inline-block;
+    border: 2px solid #12263f;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: white;
+  }
+
+  .charts-catalog-preview-panel {
+    /*flex: 1 1 auto;*/
+    height: 100%;
+    min-height: 50%;
+    background: var(--wf-red);
+    color: white;
+    border-radius: 10px;
+    padding: 12px;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .charts-catalog-selection-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: #e5eaf3;
+    color: var(--wf-muted);
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  .charts-catalog-selected-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 12px 12px 12px;
+  }
+
+  .charts-catalog-selected-item {
+    border: 1px solid var(--wf-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: white;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .charts-catalog-selected-empty {
+    color: var(--wf-muted);
+    font-size: 13px;
+    padding: 8px 2px;
+  }
+
+  .charts-catalog-right-footer {
+    flex: 0 0 auto;
+    padding: 12px;
+    border-top: 1px solid var(--wf-border);
+  }
+
+  .wf-assistant-placeholder {
+    flex: 0 0 145px;
+    background: var(--wf-card-bg);
+    border: 1px solid var(--wf-border);
+    border-radius: 12px;
+    box-shadow: var(--wf-shadow);
+    padding: 16px;
+    color: var(--wf-muted);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+
+<body>
+  <div class="wf-page">
+    <div class="wf-header">
+      <div>
+        <div class="wf-brand">
+          <div class="wf-logo">W</div>
+          <div>
+            <div>Dashboard builder</div>
+            <div class="wf-subtitle">Waterflood Insights</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="fetch-catalog" class="btn btn-primary">
+        Fetch Catalog
+      </button>
+    </div>
+
+    <charts-catalog-control id="charts-catalog"></charts-catalog-control>
+
+    <div class="wf-assistant-placeholder">
+      Assistant placeholder: chart, chatbox, recommendations, or explanations will go here.
+    </div>
+
+    <!--pre id="selected-plots-output" style="display:none;"></pre-->
+  </div>
+
+
+
+
+
+
+
+<script>
+
+class ChartsCatalogControl extends HTMLElement {
+  
+  constructor() {
+    super();
+
+    this.catalog = null;
+    this.selectedPlot = null;
+    this.selectedPlotIndexes = [];
+    this.editedParametersByFunction = {};
+    this.editor = null;
+    this.activeCategory = "All";
+  }
+
+  connectedCallback() {
+    this.render1();
+  }
+
+  render1() {
+    this.innerHTML = `
+      <div class="wf-main-grid">
+
+        <section class="pane xxwf-panel">
+          <div class="wf-panel-header">Plot catalog</div>
+
+          <div class="wf-panel-body charts-catalog-catalog-area">
+            <div
+              data-role="charts-catalog-category-filters"
+              class="wf-filter-placeholder"
+            ></div>
+
+            <div
+              data-role="charts-catalog-list"
+              class="charts-catalog-list-panel"
+            ></div>
+
+            <div
+              data-role="charts-catalog-special-card"
+              class="charts-catalog-special-card"
+            >
+              <div class="charts-catalog-special-card-content">
+                <div class="tela-logo"></div>
+
+                <div>
+                  <div class="charts-catalog-special-button">
+                    Create Custom Plot
+                  </div>
+
+                  <div class="charts-catalog-special-text">
+                    Can't find what you need?<br>
+                    Ask Tela to create it for you.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pane xxwf-panel">
+          <div class="wf-panel-header">Description + parameters</div>
+
+          <div class="wf-panel-body charts-catalog-middle-body">
+            <div
+              data-role="charts-catalog-description"
+              class="charts-catalog-description-box"
+            >
+              Select a plot to see its description and parameters.
+            </div>
+
+            <div class="charts-catalog-section-title">Parameters</div>
+
+            <div
+              data-role="charts-catalog-parameter-editor"
+              class="charts-catalog-parameter-editor"
+            ></div>
+
+            <div class="charts-catalog-actions">
+              <button
+                data-role="charts-catalog-apply-parameters"
+                class="btn btn-success btn-sm"
+                disabled
+              >
+                Apply parameters
+              </button>
+
+              <button
+                data-role="charts-catalog-reset-parameters"
+                class="btn btn-primary btn-sm"
+                disabled
+              >
+                Reset parameters
+              </button>
+            </div>
+
+            <div>
+              <span class="charts-catalog-preview-label">Preview</span>
+            </div>
+
+            <div
+              data-role="charts-catalog-preview"
+              class="charts-catalog-preview-panel"
+            >
+              Preview placeholder...
+            </div>
+          </div>
+        </section>
+
+        <section class="pane xxwf-panel">
+          <div class="wf-panel-header">
+            Current selection
+            <span
+              data-role="charts-catalog-selection-count"
+              class="charts-catalog-selection-count"
+            >0</span>
+          </div>
+
+          <div
+            data-role="charts-catalog-selected-list"
+            class="charts-catalog-selected-list"
+          ></div>
+
+          <div class="charts-catalog-right-footer">
+            <button
+              data-role="charts-catalog-generate"
+              class="btn btn-warning w-100"
+            >
+              Generate
+            </button>
+          </div>
+        </section>
+
+      </div>
+    `;
+
+    this.bindButtons();
+    this.updateSelectedCompactList();
+  }
+
+  bindButtons() {
+    this.applyButton = this.querySelector(
+      '[data-role="charts-catalog-apply-parameters"]'
+    );
+
+    this.resetButton = this.querySelector(
+      '[data-role="charts-catalog-reset-parameters"]'
+    );
+
+    this.generateButton = this.querySelector(
+      '[data-role="charts-catalog-generate"]'
+    );
+
+    this.applyButton.addEventListener("click", () => {
+      this.applyParameters();
+    });
+
+    this.resetButton.addEventListener("click", () => {
+      this.resetParameters();
+    });
+
+    this.generateButton.addEventListener("click", () => {
+    const selected = this.getSelected();
+
+    console.log("Selected plots:", selected);
+
+    this.dispatchEvent(
+        new CustomEvent("generate-dashboard-plots", {
+        detail: {
+            selectedPlots: selected
+        },
+        bubbles: true,
+        composed: true
+        })
+    );
+    });
+        
+
+    const specialCard = this.querySelector(
+      '[data-role="charts-catalog-special-card"]'
+    );
+
+    if (specialCard) {
+      specialCard.addEventListener("click", () => {
+        document
+          .querySelector(".wf-assistant-placeholder")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+      });
+    }
+  }
+
+  setCatalog(catalog) {
+    this.catalog = catalog;
+    this.selectedPlot = null;
+    this.selectedPlotIndexes = [];
+    this.editedParametersByFunction = {};
+    this.activeCategory = "All";
+
+    if (this.editor) {
+      this.editor.destroy();
+      this.editor = null;
+    }
+
+    this.querySelector(
+      '[data-role="charts-catalog-parameter-editor"]'
+    ).innerHTML = "";
+
+    this.querySelector(
+      '[data-role="charts-catalog-description"]'
+    ).textContent = "Select a plot to see its description and parameters.";
+
+    this.renderCategoryFilters();
+    this.renderCatalog1();
+    this.applyCategoryFilter();
+    this.updateSelectedCompactList();
+    this.updateParameterButtonsState();
+  }
+
+  renderCategoryFilters() {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-category-filters"]'
+    );
+
+    if (!container || !this.catalog?.items) return;
+
+    const categories = [
+      "All",
+      ...new Set(this.catalog.items.map(plot => plot.category || "General"))
+    ];
+
+    container.innerHTML = "";
+
+    categories.forEach(category => {
+      const chip = document.createElement("span");
+      chip.className = "wf-filter-chip";
+      chip.textContent = category;
+
+      if (category === this.activeCategory) {
+        chip.classList.add("active");
+      }
+
+      chip.addEventListener("click", () => {
+        this.activeCategory = category;
+        this.renderCategoryFilters();
+        this.applyCategoryFilter();
+      });
+
+      container.appendChild(chip);
+    });
+  }
+
+  applyCategoryFilter() {
+    if (!this.catalog?.items) return;
+
+    this.querySelectorAll(".charts-catalog-card").forEach(card => {
+      const index = Number(card.dataset.index);
+      const plot = this.catalog.items[index];
+
+      const visible =
+        this.activeCategory === "All" ||
+        (plot.category || "General") === this.activeCategory;
+
+      card.classList.toggle("hidden", !visible);
+    });
+  }
+
+  renderCatalog1() {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-list"]'
+    );
+
+    container.innerHTML = "";
+
+    if (!this.catalog || !Array.isArray(this.catalog.items)) {
+      container.innerHTML = `
+        <div class="alert alert-secondary">
+          No catalog loaded.
+        </div>
+      `;
+      return;
+    }
+
+    this.catalog.items.forEach((plot, index) => {
+      const card = document.createElement("div");
+      card.className = "card charts-catalog-card";
+      card.dataset.index = index;
+
+      card.innerHTML = `
+        <div class="charts-catalog-card-header">
+          <input
+            type="checkbox"
+            class="form-check-input charts-catalog-card-checkbox"
+          />
+          <div class="charts-catalog-card-title">${plot.display_name}</div>
+        </div>
+
+        <div class="charts-catalog-card-description">
+          ${plot.description || ""}
+        </div>
+      `;
+
+      const header = card.querySelector(".charts-catalog-card-header");
+
+      header.addEventListener("click", event => {
+        event.stopPropagation();
+
+        const wasSelected = this.selectedPlotIndexes.includes(index);
+
+        this.togglePlotSelection(index);
+
+        const isSelected = this.selectedPlotIndexes.includes(index);
+
+        if (!wasSelected && isSelected) {
+          this.showPlotParameters(index);
+        }
+      });
+
+      card.addEventListener("click", () => {
+        this.showPlotParameters(index);
+      });
+
+      container.appendChild(card);
+    });
+
+    this.updateCardSelectionStyles1();
+  }
+
+  togglePlotSelection(index) {
+    const isSelected = this.selectedPlotIndexes.includes(index);
+
+    if (isSelected) {
+      this.selectedPlotIndexes =
+        this.selectedPlotIndexes.filter(i => i !== index);
+    } else {
+      this.selectedPlotIndexes.push(index);
+    }
+
+    this.updateCardSelectionStyles1();
+    this.updateSelectedCompactList();
+    this.updateParameterButtonsState();
+  }
+
+  updateCardSelectionStyles1() {
+    this.querySelectorAll(".charts-catalog-card").forEach(card => {
+      const index = Number(card.dataset.index);
+      const isSelected = this.selectedPlotIndexes.includes(index);
+
+      card.classList.toggle("selected", isSelected);
+
+      const checkbox = card.querySelector(".charts-catalog-card-checkbox");
+      checkbox.checked = isSelected;
+    });
+  }
+
+  updateSelectedCompactList() {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-selected-list"]'
+    );
+
+    const count = this.querySelector(
+      '[data-role="charts-catalog-selection-count"]'
+    );
+
+    if (!container || !count) return;
+
+    const selected = this.getSelected();
+
+    count.textContent = selected.length;
+
+    if (selected.length === 0) {
+      container.innerHTML = `
+        <div class="charts-catalog-selected-empty">
+          No plots selected.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = selected
+      .map((plot, i) => `
+        <div class="charts-catalog-selected-item">
+          ${i + 1}. ${plot.display_name}
+        </div>
+      `)
+      .join("");
+  }
+
+  showPlotParameters(index) {
+    this.selectedPlot = this.catalog.items[index];
+
+    this.querySelector(
+      '[data-role="charts-catalog-description"]'
+    ).textContent =
+      this.selectedPlot.application ||
+      this.selectedPlot.description ||
+      "No description available.";
+
+    this.renderParameterEditor(this.selectedPlot);
+    this.updateParameterButtonsState();
+  }
+
+  renderParameterEditor(plot) {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-parameter-editor"]'
+    );
+
+    container.innerHTML = "";
+
+    if (this.editor) {
+      this.editor.destroy();
+      this.editor = null;
+    }
+
+    const parameters = plot.parameters || {};
+
+    if (Object.keys(parameters).length === 0) {
+      container.innerHTML = `
+        <div class="alert alert-secondary">
+          This plot has no editable parameters.
+        </div>
+      `;
+      return;
+    }
+
+    const schema = this.buildSchemaFromParameters(parameters);
+
+    const data =
+      this.editedParametersByFunction[plot.function] ||
+      this.buildDataFromParameters(parameters);
+
+    this.editor = new JSONEditor(container, {
+      schema: schema,
+      startval: data,
+      theme: "bootstrap5",
+      disable_edit_json: true,
+      disable_properties: true,
+      no_additional_properties: true,
+      compact: true
+    });
+  }
+
+  buildSchemaFromParameters(parameters) {
+    const properties = {};
+
+    Object.entries(parameters).forEach(([key, param]) => {
+      properties[key] = {
+        title: param.display_name,
+        description: param.description,
+        type: this.mapParameterType(param.type)
+      };
+    });
+
+    return {
+      type: "object",
+      title: "Parameters",
+      properties: properties
+    };
+  }
+
+  buildDataFromParameters(parameters) {
+    const data = {};
+
+    Object.entries(parameters).forEach(([key, param]) => {
+      data[key] = param.value;
+    });
+
+    return data;
+  }
+
+  mapParameterType(type) {
+    if (type === "string") return "string";
+    if (type === "float") return "number";
+    if (type === "int") return "integer";
+    if (type === "bool") return "boolean";
+
+    return "string";
+  }
+
+  applyParameters() {
+    if (!this.selectedPlot || !this.editor) {
+      return;
+    }
+
+    const errors = this.editor.validate();
+
+    if (errors.length > 0) {
+      console.log(errors);
+      return;
+    }
+
+    this.editedParametersByFunction[this.selectedPlot.function] =
+      this.editor.getValue();
+
+    console.log(JSON.stringify({
+      message: "Parameters applied",
+      function: this.selectedPlot.function,
+      parameters: this.editedParametersByFunction[this.selectedPlot.function]
+    }, null, 2));
+  }
+
+  resetParameters() {
+    if (!this.selectedPlot) {
+      return;
+    }
+
+    delete this.editedParametersByFunction[this.selectedPlot.function];
+
+    this.renderParameterEditor(this.selectedPlot);
+    this.updateParameterButtonsState();
+
+    console.log(JSON.stringify({
+      message: "Parameters reset",
+      display_name: this.selectedPlot.display_name,
+      function: this.selectedPlot.function,
+      parameters: this.buildDataFromParameters(this.selectedPlot.parameters || {})
+    }, null, 2));
+  }
+
+  updateParameterButtonsState() {
+    if (!this.catalog || !this.selectedPlot) {
+      this.applyButton.disabled = true;
+      this.resetButton.disabled = true;
+      return;
+    }
+
+    const selectedIndex = this.catalog.items.findIndex(
+      p => p.function === this.selectedPlot.function
+    );
+
+    const isDisplayedPlotSelected =
+      selectedIndex >= 0 && this.selectedPlotIndexes.includes(selectedIndex);
+
+    this.applyButton.disabled = !isDisplayedPlotSelected;
+    this.resetButton.disabled = !isDisplayedPlotSelected;
+  }
+
+  getSelected() {
+    if (!this.catalog) {
+        return [];
+    }
+
+    return this.selectedPlotIndexes.map(index => {
+        const originalPlot = this.catalog.items[index];
+
+        const selectedPlot = structuredClone(originalPlot);
+
+        const editedValues =
+        this.editedParametersByFunction[originalPlot.function];
+
+        if (editedValues && selectedPlot.parameters) {
+        Object.entries(editedValues).forEach(([key, value]) => {
+            if (selectedPlot.parameters[key]) {
+            selectedPlot.parameters[key].value = value;
+            }
+        });
+        }
+
+        return selectedPlot;
+    });
+    }
+
+
+}
+
+customElements.define("charts-catalog-control", ChartsCatalogControl);
+
+document.getElementById("fetch-catalog").addEventListener("click", async () => {
+  const response = await fetch("/fetch_known_plots_catalog");
+  const catalog = await response.json();
+
+  document
+    .getElementById("charts-catalog")
+    .setCatalog(catalog);
+});
+
+
+</script>
+
+
+<script>
+//document.documentElement.dataset.theme = "dark";
+
+
+document.getElementById("charts-catalog")
+  .addEventListener("generate-dashboard-plots", async (event) => {
+    const selectedPlots = event.detail.selectedPlots;
+
+    const response = await fetch("/generate_dashboard_plots", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(selectedPlots)
+    });
+
+    const result = await response.json();
+
+    console.log("Backend response:", result);
+  });
+
+</script>
+</body>
+</html>

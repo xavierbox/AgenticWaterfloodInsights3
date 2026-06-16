@@ -130,6 +130,24 @@ class SmartData:
             raise
 
     @staticmethod
+    def init_from_semantic_models( table_models: List[TableCard]):
+
+        smart_data = SmartData()
+
+        try:
+            
+            known_table_models = { t.name: t for t in table_models } 
+            smart_data._catalog.init_from_semantic_models( known_table_models )
+
+        except Exception as e:
+            print("exception", str(e))
+            smart_data.clear()
+            raise
+
+        return smart_data
+
+
+    @staticmethod
     def initialize_from_named_dataframes(
         df_dict: Dict[str, pd.DataFrame],
         named_table_models: Dict[str, TableCard],
@@ -181,9 +199,18 @@ class SmartData:
         """Returns the creation date of each table"""
         return { t: v.creation_date  for t,v in self._catalog.tables.items() }   # pyright: ignore[reportReturnType]
     
+
+    def get_single_table_brief_description( self, table_name:str ):
+        """Returns a brief textual description of a single table"""
+        return { t: v.description  for t,v in self._catalog.tables.items() if t.lower()==table_name }  
+
+
     def get_tables_brief_description( self ):
         """Returns a brief textual description of the tables"""
         return { t: v.description  for t,v in self._catalog.tables.items() }  
 
-    def get_table_as_df( self, table_name )->pd.DataFrame:
+    def get_table_as_df( self, table_name:str )->pd.DataFrame:
         return self.conn.execute(f"SELECT * FROM {table_name}").fetchdf()
+
+    def get_df( self, table_name:str )->pd.DataFrame:
+        return self.get_table_as_df( self, table_name )

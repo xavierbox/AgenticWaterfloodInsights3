@@ -49,12 +49,15 @@ def azure_llm_if():
 
     api_version = "2024-12-01-preview"
     
+    print('zero temp, seed 42, top_p = 1')
     llm = AzureChatOpenAI(
         azure_deployment=deployment,
         model=model_name,
         temperature=0.0,
+        top_p=1.0,
+        seed=42,
         azure_endpoint=endpoint,
-        api_key=os.environ['AZURE_OPENAI_API_KEY'],
+        api_key=os.environ['AZURE_OPENAI_API_KEY'], # type: ignore
         api_version=api_version,
     )
      

@@ -5,14 +5,7 @@
   <title>Waterflood Insights</title>
 
   <style>
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
+
 
     wf-chatbox {
       display: block;
@@ -36,8 +29,8 @@
       justify-content: center;
       flex-shrink: 0;
     }
-
-    .wf-chatbox-logo {
+ 
+    .tela-logo {
       width: 36px;
       height: 36px;
       border-radius: 50%;
@@ -159,7 +152,7 @@
   <wf-chatbox></wf-chatbox>
 
   <script>
-    class WaterfloodInsightsAgentic extends HTMLElement {
+    class TelaLikeWaterfloodInsightsAgentic extends HTMLElement {
       connectedCallback() {
         this.render();
       }
@@ -174,7 +167,7 @@
         header.className = "wf-chatbox-header";
 
         const logo = document.createElement("div");
-        logo.className = "wf-chatbox-logo";
+        logo.className = "tela-logo";
 
         header.appendChild(logo);
 
@@ -265,7 +258,7 @@
       }
     }
 
-    customElements.define("wf-chatbox", WaterfloodInsightsAgentic);
+    customElements.define("wf-chatbox", TelaLikeWaterfloodInsightsAgentic);
   </script>
 
 </body>

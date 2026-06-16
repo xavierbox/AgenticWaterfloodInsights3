@@ -7,17 +7,17 @@ sys.path.append("../../")
 from pathlib import Path
 from typing import Any, Dict
 
-from runtime.v4.semantics.semantic_models import SemanticCatalog, SemanticContext, SQLIdiomsCatalog
+from runtime.v4.semantics.models.semantic_models import SemanticCatalog
 
 
-
-def load_json(path: Path) -> Dict[str, Any]:
+def _load_json(path: Path) -> Dict[str, Any]:
     with path.open('r', encoding='utf-8') as f:
         return json.load(f)
 
+
 def load_idiom_rules( idiom = 'duckdb', path = Path('semantics/idioms.json')):
  
-    idioms = load_json( path )
+    idioms = _load_json( path )
 
     rules = idioms[ idiom ]
     context = "\n".join(f"{name}: {detail}" for name, detail in rules.items())
@@ -29,7 +29,7 @@ def load_idiom_rules( idiom = 'duckdb', path = Path('semantics/idioms.json')):
 
 
 def load_semantics(full_path: Path ):#= Path('semantics')) -> tuple[SemanticCatalog, SQLIdiomsCatalog, SemanticContext]:
-    semantic_catalog = SemanticCatalog.model_validate(load_json(full_path))
+    semantic_catalog = SemanticCatalog.model_validate(_load_json(full_path))
     return semantic_catalog
     #sql_idioms = SQLIdiomsCatalog.model_validate(_load_json(base_dir / 'sql_idioms.json'))
     #semantic_context = SemanticContext.model_validate(_load_json(base_dir / 'semantic_temporal.json'))

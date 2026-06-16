@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Waterflood Insights Analytics</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+
+    <!-- Include your custom JS components here -->
+    <script src="{{ url_for('static', filename='js/app_components.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/styles.css') }}">
+
+<style>
+  :root {
+    --wf-bg: #f6f8fc;
+    --wf-card-bg: #ffffff;
+    --wf-border: #dfe5f1;
+    --wf-text: #1d2b44;
+    --wf-muted: #6c7a92;
+    --wf-blue: #2563eb;
+    --wf-blue-soft: #eef4ff;
+    --wf-red: #8b0000;
+    --wf-shadow: 0 8px 24px rgba(29, 43, 68, 0.08);
+  }
+
+
+
+  
+.pane{
+    background: var(--pane-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid var(--pane-border);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+ 
+
+
+.card{
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--pane-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /*background: linear-gradient(
+        135deg,
+        var(--card-gradient-start),
+        var(--card-gradient-end)
+    ) !important;*/
+    
+    /*background: linear-gradient(
+        140deg,
+        var(--card-gradient-start),
+        var(--card-gradient-end)
+    ) !important;*/
+    
+
+    color: var(--text-color) !important;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    transition: all 0.2s ease;
+}
+
+.card:hover{
+    transform: translateY(-2px)!important;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.35)!important;
+    border-color: var(--hover-color) !important;
+}
+
+
+
+charts-catalog-control {
+  /*flex: 1 1 auto;*/
+  height: 90vh;/*%;*/
+  min-height: 0;
+  display: block;
+}
+  .wf-page {
+    /*height: 100vh;*/
+    overflow: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .wf-header {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px;
+  }
+
+  .wf-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--text-color);
+    font-size: 18px;
+  }
+
+  .wf-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+  }
+
+  .wf-subtitle {
+    color: var(--wf-muted);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: -4px;
+  }
+
+  .wf-main-grid {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: 1.05fr 1.25fr 0.95fr;
+    gap: 12px;
+  }
+
+  .xxwf-panel {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /*background: var(--wf-card-bg);
+    border: 1px solid var(--wf-border);
+    border-radius: 12px;
+    box-shadow: var(--wf-shadow);*/
+  }
+
+  .wf-panel-header {
+    flex: 0 0 auto;
+    padding: 14px 16px 8px 16px;
+    /*font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;*/
+    color: var(--text-color);
+  }
+
+  .wf-panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 10px 14px;
+  }
+
+  .charts-catalog-catalog-area {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    /*background-color: red;*/
+  }
+
+ 
+
+  .wf-filter-placeholder {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .wf-filter-chip {
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--wf-muted);
+   color: var(--text-color);
+    background: transparent;/* #f3f6fb;*/
+  }
+
+.wf-filter-chip:hover{
+  border-bottom: 1px solid var(--wf-blue);
+  
+}
+  .wf-filter-chip.active {
+    /*color: white;*/
+    border-bottom: 1px solid var(--wf-blue);
+    /*background: var(--wf-blue);*/
+  }
+
+  .charts-catalog-list-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .charts-catalog-special-card {
+    flex: 0 0 auto;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid var(--hover-color) !important;
+    /*border: 1px solid var(--wf-border);*/
+    border-radius: 10px;
+    /*background: #ffffff;*/
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s ease;
+  }
+
+  .charts-catalog-special-card:hover {
+    border-color: var(--hover-color) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+    background: var(--secondary-color);
+  }
+
+  .charts-catalog-special-button {
+    border: 1px solid var(--wf-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 800;
+    color: var(--wf-blue);
+    background: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .charts-catalog-special-text {
+    font-size: 12px;
+    color: var(--wf-muted);
+    line-height: 1.25;
+  }
+
+  .charts-catalog-card {
+    flex: 0 0 auto;
+    cursor: pointer;
+    border: 1px solid var(--wf-border);
+    border-radius: 10px;
+    background: white;
+    transition: 0.15s ease;
+    padding: 10px;
+  }
+
+  .charts-catalog-card:hover {
+    border-color: var(--wf-blue);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+  }
+
+  .charts-catalog-card.selected {
+    border: 2px solid var(--wf-blue);
+    background: var(--wf-blue-soft);
+  }
+
+  .charts-catalog-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .charts-catalog-card-title {
+    font-weight: 800;
+    color: var(--wf-blue);
+    font-size: 13px;
+  }
+
+  .charts-catalog-card-description {
+    margin: 6px 0 0 26px;
+    color: var(--wf-muted);
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .charts-catalog-description-box {
+    color: var(--wf-muted);
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .charts-catalog-section-title {
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin: 12px 0 8px 0;
+  }
+
+  .charts-catalog-parameter-editor {
+    font-size: 0.8rem;
+  }
+
+  .charts-catalog-parameter-editor .form-group {
+    display: grid !important;
+    grid-template-columns: 120px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    margin-bottom: 6px !important;
+  }
+
+  .charts-catalog-parameter-editor label {
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .charts-catalog-parameter-editor input,
+  .charts-catalog-parameter-editor select,
+  .charts-catalog-parameter-editor textarea {
+    min-height: 28px !important;
+    padding: 3px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .charts-catalog-parameter-editor .form-text,
+  .charts-catalog-parameter-editor small,
+  .charts-catalog-parameter-editor .help-block {
+    grid-column: 2;
+    font-size: 0.7rem !important;
+    margin: 0 !important;
+  }
+
+  .charts-catalog-parameter-editor .card,
+  .charts-catalog-parameter-editor .card-body {
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  .charts-catalog-parameter-editor .je-header span,
+  .charts-catalog-parameter-editor h3 span,
+  .charts-catalog-parameter-editor h4 span,
+  .charts-catalog-parameter-editor .card-title span {
+    display: none !important;
+  }
+
+  .charts-catalog-actions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 14px 0;
+  }
+
+  .charts-catalog-preview-label {
+    display: inline-block;
+    border: 2px solid #12263f;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: white;
+  }
+
+  .charts-catalog-preview-panel {
+    /*flex: 1 1 auto;*/
+    height: 100%;
+    min-height: 50%;
+    background: var(--wf-red);
+    color: white;
+    border-radius: 10px;
+    padding: 12px;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .charts-catalog-selection-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: #e5eaf3;
+    color: var(--wf-muted);
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  .charts-catalog-selected-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 12px 12px 12px;
+  }
+
+  .charts-catalog-selected-item {
+    border: 1px solid var(--wf-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: white;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .charts-catalog-selected-empty {
+    color: var(--wf-muted);
+    font-size: 13px;
+    padding: 8px 2px;
+  }
+
+  .charts-catalog-right-footer {
+    flex: 0 0 auto;
+    padding: 12px;
+    border-top: 1px solid var(--wf-border);
+  }
+
+  .wf-assistant-placeholder {
+    flex: 0 0 145px;
+    background: var(--wf-card-bg);
+    border: 1px solid var(--wf-border);
+    border-radius: 12px;
+    box-shadow: var(--wf-shadow);
+    padding: 16px;
+    color: var(--wf-muted);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+
+<body>
+
+
+
+<chat-dialog id="chat-dialog"></chat-dialog>
+
+<new-three-column-main-layout id="main-layout">
+<div class="card" id="data-selection-card" style="display: block;">
+            <div>
+                <label id="project_name" class="subtitle">Demo1</label>
+                <hr>
+
+                <p class="subtitle">Reservoir management unit</p>
+                <combobox-component id="reservoir-unit-selector" data-info="{&quot;creation_date&quot;:&quot;2024-09-06&quot;,&quot;dates&quot;:[&quot;Mon, 05 Oct 2020 00:00:00 GMT&quot;,&quot;Thu, 25 Nov 2021 00:00:00 GMT&quot;],&quot;project_name&quot;:&quot;Demo1&quot;,&quot;reservoirs&quot;:{&quot;RAWA&quot;:{&quot;LW&quot;:[0],&quot;RW&quot;:[0]}},&quot;studies&quot;:[&quot;TestNewExport&quot;,&quot;xxx&quot;,&quot;TestModel1&quot;,&quot;Demo1&quot;],&quot;tag&quot;:&quot;demo,xavier&quot;,&quot;tags&quot;:&quot;*&quot;}">
+            <select class="form-select combobox"><option disabled="true" selected="true">Select option</option><option value="LW">LW</option><option value="RW">RW</option></select>
+        </combobox-component>
+            </div>
+            <div>
+   
+                <details><summary class="subtitle mt-2">Sectors</summary>
+                <two-column-checkbox-list id="sector-selector"><div class="checkbox-rows-container row g-3"><div class="col-6 checkbox-col"></div><div class="col-6 checkbox-col"></div></div></two-column-checkbox-list>
+               </details>
+            </div>
+            <div>
+                <p class="subtitle">Time frame</p>
+
+                <div class="d-flex align-items-center mb-3">
+                    <label for="start-date">Start:</label>
+                    <input type="date" id="start-date" name="start-date" class="form-control form-control-sm mb-2">
+    
+                  </div>
+
+                  <div class="d-flex align-items-center mb-3">
+
+                <label for="end-date">End: </label>
+                <input type="date" id="end-date" name="end-date" class="form-control form-control-sm">
+            </div>
+ 
+                <p></p>
+                Displace time frame and load data 
+                <div class="d-flex align-items-center gap-2">
+                    
+                    <button class="btn btn-sm btn-primary" id="time-frame-player-left-button">
+                        <i class="fa fa-caret-left"></i>
+                    </button>
+                    <input type="number" id="range-value" name="range-value" class="form-control form-control-sm" min="1" max="180" value="1" style="width: 80px;">
+                    <button class="btn btn-sm btn-primary" id="time-frame-player-right-button">
+                        <i class="fa fa-caret-right"></i>
+                    </button>
+                </div>
+        
+            </div>
+            <hr>
+            <div style="display:flex; gap:10px">
+            <button id="apply-data-selection-button" class="btn btn-primary">Apply</button>   
+            <button class="well-selection-indicator" style="display: none;"><span>⚠Well selection active</span></button>
+            </div>
+            
+</div>
+
+ 
+  <tabs-component id="tabs"></tabs-component>
+
+
+</new-three-column-main-layout> 
+
+<charts-catalog-control id="charts-catalog"></charts-catalog-control>
+
+    <h4>vis system</h4>
+   <button id="fetch-catalog" class="btn btn-primary">
+        Fetch Catalog
+      </button>
+
+
+<script>
+
+let selected_well_names = [] 
+
+
+function Id( x ){
+
+    return document.querySelector("#"+x)
+}
+function get_project_data_selection( ){
+
+    debugger;
+    let data = {}
+    data['subzone'] = Id('reservoir-unit-selector').getValue();
+    data['date']   = [Id('start-date').value, Id('end-date').value];
+    data['sector'] = Id('sector-selector').getCheckedItems().map(str => parseInt(str));
+    data['project_name'] = Id('project_name').innerHTML;
+    
+
+    if((selected_well_names != undefined) && (selected_well_names.length > 0))
+        data['name']   = selected_well_names
+  
+    return data;
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const sectorSelector = document.getElementById("sector-selector");
+    if (sectorSelector) {
+        // Creates elements: ["1", "2", "3"]
+        sectorSelector.set_data(["1", "2", "3"]);
+    }
+
+    document.documentElement.setAttribute('data-theme', 'dark');
+
+    let layout = document.querySelector("#main-layout");
+
+    layout.set('left-top',Id('data-selection-card'));
+    layout.set('right',Id('chat-dialog'));
+    
+    //layout.set('middle',Id('charts-catalog'));
+    
+    const chartIcon = Object.assign(document.createElement("i"), {className: "fa-solid fa-globe"});
+    let tabs = document.getElementById('tabs');
+    tabs.addTabWithContent("Home", Id('charts-catalog'),chartIcon);
+    tabs.disableClose("Home", true);
+    layout.set('middle',Id('tabs'));
+  
+
+
+    const comboComponent = document.getElementById("reservoir-unit-selector");
+    if (comboComponent) {
+        // Set the explicit string options using its built-in method
+        comboComponent.setData(["Demo1", "IX5I_4P"]);
+
+         // 2. Fetch non-disabled options list and pick the first index [0]
+        const availableOptions = comboComponent.getOptions();
+        if (availableOptions.length > 0) {
+            comboComponent.setValue(availableOptions[0]); // Selects "Demo1"
+        }
+
+    }
+    const sectorsDetails = document.querySelector("#data-selection-card details");
+
+    if (sectorsDetails) {
+        // Programmatically expand the details block
+        sectorsDetails.open = true;
+    }
+
+    const startDateInput = document.getElementById("start-date");
+    const endDateInput = document.getElementById("end-date");
+
+    // Set Start Date to June 15, 2022
+    if (startDateInput) {
+        startDateInput.value = "2022-06-15";
+    }
+
+    // Set End Date to June 15, 2027
+    if (endDateInput) {
+        endDateInput.value = "2027-06-15";
+    }
+
+});
+
+
+
+document.getElementById("apply-data-selection-button").addEventListener('click',()=>{
+
+console.log("Data selected");
+
+});
+
+document.getElementById("chat-dialog").addEventListener('chat:user_message', function(evt) {
+   
+    const user_text = evt.detail.text;
+    // Guard Clause: Returns early if text is null, undefined, or an empty string ""
+    if (!user_text || user_text.trim() === "") {
+        return;
+    } console.log('user text', evt.detail.text);
+
+    debugger;
+    let project_data_description_from_ui = get_project_data_selection();
+        
+    console.log(project_data_description_from_ui);
+
+
+});
+
+
+document.getElementById("fetch-catalog").addEventListener("click", async () => {
+  
+ 
+  debugger;
+  const response = await fetch("/fetch_known_plots_catalog");
+  const catalog = await response.json();
+
+  document
+    .getElementById("charts-catalog")
+    .setCatalog(catalog);
+    
+});
+
+
+</script>
+</body>
+</html>

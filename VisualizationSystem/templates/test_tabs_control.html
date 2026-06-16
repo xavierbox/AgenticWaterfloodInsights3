@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TabsComponent Test</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <link rel="stylesheet" href="./styles.css">
+  <!--script src="./tabs_control.js"></script-->
+  <!--script src="./app_components.js"></script-->
+  
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Include your custom JS components here -->
+    <script src="{{ url_for('static', filename='js/app_components.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='js/styles.css') }}">
+
+</head>
+
+<body>
+<button id="add-tab-button">Add tab</button>
+<button id="fetch-catalog" class="btn btn-primary">Fetch Catalog</button>
+
+
+ <new-three-column-main-layout id ='main-layout'></new-three-column-main-layout>
+ <tabs-component id="tabs"></tabs-component>
+ 
+<charts-catalog-control id="charts-catalog"></charts-catalog-control>
+
+<chat-dialog id="genai-chat-dialog" style="display:none;"></chat-dialog>
+
+
+<script>
+document.documentElement.setAttribute("data-theme", "dark");
+ 
+/**
+ * Extract and display ANY server-side error using SweetAlert2
+ * @param {Response} response - The fetch Response object
+ */
+async function showServerResponseError(response) {
+    let errorMsg = "An unexpected error occurred.";
+    let errorTitle = "Server Error";
+    
+    // Dynamically adjust the alert title based on common HTTP status codes
+    if (response.status === 422) {
+        errorTitle = "Validation Error";
+    } else if (response.status === 404) {
+        errorTitle = "Resource Not Found";
+    } else if (response.status === 500) {
+        errorTitle = "Internal Server Failure";
+    }
+
+    try {
+        const errorData = await response.json();
+        
+        // Formats detailed Pydantic structural errors if present
+        if (errorData.details && Array.of(errorData.details)) {
+            errorMsg = errorData.details
+                .map(err => `• <b>${err.loc.join('.')}</b>: ${err.msg}`)
+                .join('<br>');
+        } else {
+            // Uses custom messaging passed from your Flask code wrapper
+            errorMsg = errorData.message || errorMsg;
+        }
+    } catch (e) {
+        // Fallback if Flask crashed severely and returned raw HTML instead of JSON
+        errorMsg = `HTTP Error ${response.status}: The server was unable to fulfill your request.`;
+    }
+
+    // Fire the SweetAlert2 popup directly
+    Swal.fire({
+        icon: 'error',
+        title: errorTitle,
+        html: errorMsg,
+        confirmButtonColor: '#001f9c' 
+    });
+}
+
+async function sendChatAnalystQuery( query )   {
+
+    //alert(query)
+    console.log("[processChatAnalystQuery]", query);
+ 
+    let payload = { query: query, 
+     project_name: "IX5I_4P",
+     selected_wells: null,       //    or ['name1','name2',....] 
+     selected_subzone: "WARA1",  //    
+     selected_sectors: null,     //    or [1,2,3] 
+     selected_study: null        //    or "the_name"
+     }
+
+ 
+    try {
+        const response = await fetch("/process_analyst_query", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+            });
+
+        // Handle bad responses gracefully using the new function
+        if (!response.ok) {
+            await showServerResponseError(response);
+            return null; // Halt execution safely here
+        }
+
+        const genai_response = await response.json();
+        console.log("genai_response received:", genai_response);
+        return genai_response;
+        
+    }  
+    catch (error) {
+        // This now only catches infrastructure failures (like network down / firewall blocked)
+        console.error("Network or execution breakdown:", error);
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Unable to communicate with the server. Check your connection.'
+        });
+
+        return null;
+    }
+
+
+}
+
+async function processChatAnalystResponse( genai_response_json ){
+
+    console.log("Received response")
+    console.log( genai_response_json )
+
+    const reponse_is_figure = true;
+
+    if( reponse_is_figure ){
+
+        
+    }
+
+
+}
+
+
+
+
+/**
+ * Part 1: Handles the network payload, POST execution, and server errors.
+ * @param {HTMLElement} buttonElement - The button triggering the click event.
+ * @returns {Promise<Object|null>} Clean parsed JSON data object or null if failed.
+ */
+async function sendCatalogPreviewRequest() {
+    console.log("[sendCatalogPreviewRequest] Dispatching request payload");
+
+    // Extract optional identifier attributes if present on the clicked button node
+    //const chartId = buttonElement?.getAttribute("data-id") || null;
+
+    let payload = {
+        chart_id: 'chartId',
+        request_type: "preview"
+    };
+
+    try {
+        const response = await fetch("/process_catalog_preview_request", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+
+        // Intercept 422, 500, or 404 responses using your global alert handler
+        if (!response.ok) {
+            await showServerResponseError(response);
+            return null; // Stop and return null up the call stack
+        }
+
+        // Return raw parsed response object directly on success
+        return await response.json();
+        
+    } catch (error) {
+        console.error("[sendCatalogPreviewRequest] Connection error:", error);
+        
+        // SweetAlert fallback for infrastructural network failures
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Unable to communicate with the server. Check your connection.'
+        });
+        
+        return null;
+    }
+}
+
+
+/**
+ * Part 2: Receives the successful backend JSON response package to modify the UI.
+ * @param {Object} responseData - The parsed data payload returned from the Flask endpoint.
+ */
+function processCatalogPreviewResponse(responseData) {
+    console.log("[processCatalogPreviewResponse] Processing data package:", responseData);
+
+
+     const catalogControl = document.getElementById("charts-catalog");
+
+  if (!catalogControl) {
+    console.warn("[processCatalogPreviewResponse] charts-catalog control not found");
+    return;
+  }
+
+  if (!responseData || !Array.isArray(responseData.data)) {
+    console.warn("[processCatalogPreviewResponse] Invalid Plotly figure:", responseData);
+    return;
+  }
+
+    const plotDiv = document.createElement("div");
+    plotDiv.style.width = "100%";
+    plotDiv.style.height = "100%";
+    plotDiv.className = "charts-catalog-preview-plot";
+
+    const data = responseData.data || [];
+    const layout = responseData.layout || {};
+    const config = responseData.config || {
+        responsive: true,
+        displaylogo: false
+    };
+
+    catalogControl.displayPreview(plotDiv);
+
+    requestAnimationFrame(() => {
+        Plotly.newPlot(plotDiv, data, layout, config);
+    });
+    
+    
+}
+
+
+ 
+
+
+function relayout( container){
+
+        //container.style.padding = '20px';
+        let inner_offset = 5; 
+        let pad = 5;
+        console.log('resizing');
+        const update = {
+            //title: {text: 'some new title'}, // updates the title
+            'width':   (parseInt( container.offsetWidth ) - pad).toString(),   // updates the xaxis range
+            'height':  ( parseInt(container.offsetHeight ) - pad).toString(),   // updates the end of the yaxis range
+            
+            //'paper_bgcolor': color,
+            'textposition':  'top center',
+            //'plot_bgcolor':  'darkblue',
+    
+     
+
+            //'x': inner_offset,
+            'margin': {
+            'l': inner_offset,
+            'r': inner_offset,
+            'b': 10*inner_offset,
+            't': 5*inner_offset,
+            //'pad': 4  
+            },
+            'autosize': true,
+            
+            };
+        Plotly.relayout(container, update);
+
+}
+
+function initialize(){
+    
+    let layout = document.getElementById('main-layout');
+    let tabs = document.getElementById("tabs");
+
+    layout.set('middle', tabs)
+    
+    const chartDiv = document.createElement("div");
+    chartDiv.style.width="100%";
+    chartDiv.style.height="100%";
+    
+    //const chartIcon = document.createElement("i");
+    //chartIcon.className = "fa-solid fa-globe";
+    const chartIcon = Object.assign(document.createElement("i"), {className: "fa-solid fa-globe"});
+
+    let catalog = document.getElementById("charts-catalog")
+    tabs.addTabWithContent("Home", catalog,chartIcon);
+    tabs.disableClose("Home", true);
+
+    document.querySelector(".layout-hide-left-button").click();
+    document.querySelector("#fetch-catalog").click();
+
+
+const data = [
+  {
+    x: ["Jan", "Feb", "Mar", "Apr", "May"],
+    y: [10, 15, 13, 18, 22],
+    type: "scatter",
+    mode: "lines+markers",
+    name: "Dummy series"
+  }
+];
+
+Plotly.newPlot(chartDiv, data, {
+  autosize: true,
+  margin: {
+    l: 30,
+    r: 10,
+    t: 25,
+    b: 30
+  },
+  xaxis: {
+    automargin: true
+  },
+  yaxis: {
+    automargin: true
+  }
+}, {
+  responsive: true,
+  displayModeBar: false
+});
+
+
+    tabs.addTabWithContent("Data", "This is the data tab.", "📊");
+    tabs.addTabWithContent("Settings", "Configuration goes here.", "⚙️");
+
+    tabs.disableClose("Home", true);
+
+    tabs.addEventListener("tab-selected", function (event) {
+      console.log("Selected tab:", event.detail.name, event.detail.index);
+    });
+
+    let counter = 1;
+
+    document.getElementById("add-tab-button").addEventListener("click", function () {
+      const name = "New Tab " + counter;
+      tabs.addTabWithContent(name, "Text content for " + name, "✨");
+      tabs.selectTab(name);
+      counter += 1;
+    });
+
+
+
+    window.addEventListener("resize", () => {
+    relayout(chartDiv);
+    });
+
+    layout.addEventListener("pane-resized", () => {
+    relayout(chartDiv);
+    });
+
+}
+
+function initializeChatAnalyst(){
+
+  const chat = document.getElementById("genai-chat-dialog");
+  const catalog = document.getElementById("charts-catalog");
+  catalog.attachGenAiChatDialog(chat);
+
+    //delete message method
+    chat.addEventListener("chat:delete-turn", (e) => {
+    //alert('deleting turn '+ e.detail.turn)
+    e.currentTarget.deleteTurn(e.detail.turn);
+    });
+
+    //user typed something
+    chat.addEventListener("chat:user_message", async (evt) => {
+
+    
+        const userText = evt.detail.text;
+        if (!userText || userText.trim().length === 0) {
+        console.log("Empty string in chatbox");
+        return;
+        }
+        console.log( '[chat.addEventListener("chat:user_message]',userText );
+        let genai_response_json = await sendChatAnalystQuery( userText.trim() ); 
+
+        if(!genai_response_json ) return; 
+
+        await processChatAnalystResponse( genai_response_json )
+
+    });
+
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    initialize();
+
+    initializeChatAnalyst();
+
+    document.getElementById('main-layout').addEventListener("pane-resized", () =>{
+        function relayoutAllPlotlyCharts(root = document) {
+        root.querySelectorAll(".js-plotly-plot").forEach((container) => {
+            relayout(container);
+        });
+        }
+
+        relayoutAllPlotlyCharts();
+
+
+    });
+
+    document.getElementById("fetch-catalog").addEventListener("click", async () => {
+    
+    
+    const response = await fetch("/fetch_known_plots_catalog");
+    const catalog = await response.json();
+
+    document
+        .getElementById("charts-catalog")
+        .setCatalog(catalog);
+        
+    });
+
+
+    document.getElementById("charts-catalog").addEventListener("generate-dashboard-plots", async (event) => {
+        const selectedPlots = event.detail.selectedPlots;
+
+        const response = await fetch("/generate_dashboard_plots", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(selectedPlots)
+        });
+
+        const result = await response.json();
+
+        console.log("Backend response:", result);
+    });
+
+    
+    document.querySelector('[data-role="charts-catalog-preview-button"]').addEventListener("click", async (event) => {
+            
+
+        console.log("Preview button clicked!");
+        //const targetButton = event.target.closest('[data-role="charts-catalog-preview-button"]');
+    
+
+        const responseData = await sendCatalogPreviewRequest();
+        if (!responseData) return;
+        processCatalogPreviewResponse(responseData);
+
+        });
+
+
+});
+
+
+ 
+
+
+
+
+
+  </script>
+</body>
+</html>

@@ -2,7 +2,7 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
-from VisualizationSystem.visualization_backend.global_constants import CRMDATASET
+from global_constants import CRMDATASET
 
 
 ParameterType = Literal["string", "float", "bool", "int"]
@@ -68,7 +68,7 @@ class VRRPlot(PlotCatalogItem):
     data_context: list[str] = Field(default_factory=lambda: [CRMDATASET], description="Data context required for this plot")
     category: str = "Surveillance"
     parameters: Optional[Dict[str, PlotParameterValue]] = {
-        "ro": PlotFloatParameter(
+        "bo": PlotFloatParameter(
             display_name="Bo",
             description="Formation volume factor for oil",
             type="float",
@@ -103,6 +103,7 @@ class VRRPlot(PlotCatalogItem):
     
 class HallPlot(PlotCatalogItem):
     display_name: str = "Hall Plot"
+    function: str = "plot_hall_plot"
     application: str = "Identifying Formation Damage: It highlights near-wellbore plugging or damage. If the plot's slope steepens or moves upward, it means injectivity is declining—often indicating that poor-quality fluid or solids are blocking the reservoir pores.Diagnosing Well Stimulation: It tracks the effectiveness of acidizing or hydraulic fracturing. A drop or flattening in the slope suggests that the well has been successfully stimulated, making fluid injection much easier.Monitoring Long-Term Trends: It smoothes out day-to-day rate and pressure fluctuations, allowing engineers to spot gradual, long-term changes in reservoir pressure and fluid transmissibility over weeks or months.Evaluating Injection Strategies: It helps determine if the injected fluids are moving evenly through the reservoir and displacing oil or gas efficiently"
     description: str = "Cummulative injection pressure over time vs cummulative volume of fluid injected" 
     data_context: list[str] = Field(default= [CRMDATASET], description="Data context required for this plot")
@@ -111,6 +112,7 @@ class HallPlot(PlotCatalogItem):
 
 class WellCount(PlotCatalogItem):
     display_name: str = "Well count over time"
+    function: str = "plot_well_count"
     application: str = "Monitoring well activity over time" 
     description: str = "Displays the number of active wells over time; injectors and producers" 
     data_context: list[str] = Field(default= [CRMDATASET], description="Data context required for this plot")
@@ -119,6 +121,22 @@ class WellCount(PlotCatalogItem):
 
 class PlotCatalog(BaseModel):
     items: List[PlotCatalogItem] = Field(default_factory=list)
+
+def get_historical_data_plot_catalog() -> PlotCatalog:
+    return PlotCatalog(
+        items=[
+            WORPlot(),
+            VRRPlot(),
+            HallPlot(),
+            WellCount(),
+        ]
+    )
+
+
+catalog = get_historical_data_plot_catalog()
+
+print(catalog.model_dump())
+
 
 
 
@@ -149,16 +167,4 @@ for item in items:
 
 '''
 
-def get_historical_data_plot_catalog() -> PlotCatalog:
-    return PlotCatalog(
-        items=[
-            WORPlot(),
-            VRRPlot(),
-        ]
-    )
-
-
-catalog = get_historical_data_plot_catalog()
-
-print(catalog.model_dump())
 

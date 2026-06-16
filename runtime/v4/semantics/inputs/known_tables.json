@@ -2,7 +2,7 @@
     "tables": [
         {
             "name": "injectors",
-            "description": "Water injection time series. Each row contains a dated observation of water injection for a given Injector well in a given subzone and sector",
+            "description": "Water injection time series.",
             "kind": "base",
             "columns": [
                 {
@@ -80,7 +80,7 @@
         },
         {
             "name": "producers",
-            "description": "Production time series. Each row contains a dated observation of produced volumes (oil,gas,water) and ratios (opional) for a given producer name, sector and subzone",
+            "description": "Production time series.",
             "kind": "base",
             "columns": [
                 {
@@ -179,7 +179,7 @@
         },
         {
             "name": "locations",
-            "description": "Data of well name, sector, well type and coordinates of the named well in each subzone.",
+            "description": "Static well metadata and coordinates.",
             "kind": "base",
             "columns": [
                 {

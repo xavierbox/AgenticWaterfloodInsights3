@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Optional, Any
 from langchain_core.tools import StructuredTool, Tool
 from typing import Iterable
  
+import inspect
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -133,139 +134,6 @@ class SmartDataTools:
         snapshot = self._data.catalog_snapshot(input_tables)
         return self.format_catalog_snapshot( snapshot )
 
-    def old_catalog_snapshot(
-        self,
-        input_tables: None | str | Iterable[str] = None
-    ) -> str:
-        """
-        Returns LLM-friendly textual catalog snapshot.
-
-        Designed for:
-        - planner prompts
-        - executor prompts
-        - schema grounding
-
-        Output:
-        Structured readable text, not raw dict/json.
-        """
-
-        # =====================================================
-        # GET STRUCTURED SNAPSHOT
-        # =====================================================
-
-        snapshot = self._data.catalog_snapshot(input_tables)
-
-        lines = []
-
-        # =====================================================
-        # HEADER
-        # =====================================================
-
-        lines.append("DATABASE CATALOG SNAPSHOT")
-        lines.append("=" * 79)
-
-        # =====================================================
-        # BASE TABLES
-        # =====================================================
-
-        if snapshot.base_tables:
-            lines.append("\nBASE TABLES:")
-            lines.append("-" * 79)
-
-            for table in snapshot.base_tables:
-
-                lines.append(f"\nTable: {table.name}")
-                lines.append(f"Kind: base")
-
-                if table.description:
-                    lines.append(f"Description: {table.description}")
-
-                if table.row_count is not None:
-                    lines.append(f"Row Count: {table.row_count}")
-
-                lines.append("Columns:")
-
-                for col in table.columns:
-
-                    col_line = f"  - {col.name} ({col.data_type}"
-
-                    #if col.semantic_type:
-                    #    col_line += f", semantic: {col.semantic_type}"
-
-                    col_line += ")"
-
-                    if col.description:
-                        col_line += f": {col.description}"
-
-                    lines.append(col_line)
-
-        # =====================================================
-        # DERIVED TABLES
-        # =====================================================
-
-        if snapshot.derived_tables:
-            lines.append("\nDERIVED TABLES:")
-            lines.append("-" * 79)
-
-            for table in snapshot.derived_tables:
-
-                lines.append(f"\nTable: {table.name}")
-                lines.append(f"Kind: derived")
-
-                if table.description:
-                    lines.append(f"Description: {table.description}")
-
-                if table.row_count is not None:
-                    lines.append(f"Row Count: {table.row_count}")
-
-                if getattr(table, "created_by_sql", None):
-                    lines.append(f"Created By SQL: {table.created_by_sql}")
-
-                lines.append("Columns:")
-
-                for col in table.columns:
-
-                    col_line = f"  - {col.name} ({col.data_type}"
-
-                    #if col.semantic_type:
-                    #    col_line += f", semantic: {col.semantic_type}"
-
-                    col_line += ")"
-
-                    if col.description:
-                        col_line += f": {col.description}"
-
-                    lines.append(col_line)
-
-        # =====================================================
-        # GLOBAL RULES
-        # =====================================================
-
-        lines.append("\nGLOBAL RULES:")
-        lines.append("-" * 79)
-        lines.append("- Only listed tables and columns exist.")
-        lines.append("- Never invent tables or columns.")
-        lines.append("- Prefer reuse of derived tables when possible.")
-        lines.append("- Base tables are original datasets.")
-        lines.append("- Derived tables are previously materialized analytical outputs.")
-
-        # =====================================================
-        # FINAL TEXT
-        # =====================================================
-
-        return "\n".join(lines)
-
-
-    def old_catalog_snapshot(self, input_tables: None | str | Iterable[str] = None):# -> str:
-        """
-        Returns an agent-facing catalog snapshot with global SQL rules,
-        semantic constraints, and table schemas.
-        """
-
-        return self._data.catalog_snapshot(input_tables)
-        #table_snapshot = self._data.catalog_snapshot(input_tables)
-        #return f"{table_snapshot}"
-
     def _get_table_names( self ):
         """Returns the table names"""
         return  self._data.get_table_names() 
@@ -277,6 +145,12 @@ class SmartDataTools:
     def get_tables_brief_description( self ):
         """Returns a brief textual description of the tables"""
         return self._data.get_tables_brief_description() 
+
+    def get_single_table_brief_description( self, table_name:str ):
+        """Returns a brief textual description of a single table"""
+        return self._data.get_single_table_brief_description( table_name )  
+
+
 
     def get_tools(self):#, include_planning_tools: bool = False):
         tools = []
@@ -297,7 +171,7 @@ class SmartDataTools:
                     StructuredTool.from_function(
                         func=attr,
                         name=name,
-                        description=attr.__doc__,
+                        description=inspect.getdoc(attr),
                     )
                 )
         return tools
