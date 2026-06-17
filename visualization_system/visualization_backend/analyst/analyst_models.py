@@ -8,11 +8,11 @@ from pydantic import BaseModel, Field
 
 
 class SystemTask(BaseModel):
-    tool: Literal[
+    agent: Literal[
         "direct_answer",
         "rag_retriever",
         "data_analysis",
-        "clarification",
+        "clarification"
     ] = Field(
         description="The specific domain expert agent assigned to execute this task phase."
    )
@@ -28,21 +28,24 @@ class SystemTask(BaseModel):
 
 class SystemPlan(BaseModel):
     
-    agent: Literal["planner"] = Field(
-        description="Fixed identifier for the planner agent."
-    )
+    #agent: Literal["planner"] = Field(
+    #    description="Fixed identifier for the planner agent."
+    #)
 
     user_intent: str = Field(
         description="One-sentence summary of the user's ultimate goal."
     )
 
     tasks: List[SystemTask] = Field(
-          description=(
-            "The macro-level pipeline. Create exactly ONE task per required agent domain. "
-            "Only include multiple tasks if the user query explicitly demands cross-domain "
-            "hand-offs (e.g., fetching project structure metadata BEFORE running an analysis)."
-        ))
-    
+        description=(
+            "The macro-level pipeline. Create an individual task entry for EACH distinct "
+            "question or request found inside the user's prompt. "
+            "For example, if the user asks for a conceptual explanation AND a data analysis "
+            "plot, generate separate task elements in order: "
+            "Task 1 (direct_answer) for the explanation, Task 2 (data_analysis) for the plot."
+        )
+    )
+
     needs_clarification: bool = Field(
         default=False,
         description="True when the user request is ambiguous and cannot be safely executed."

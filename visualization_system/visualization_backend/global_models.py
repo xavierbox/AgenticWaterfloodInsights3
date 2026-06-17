@@ -11,6 +11,8 @@ class UIState(BaseModel):
     """
 
     project_name: str #| None = None 
+    selected_dates: Optional[ List[str] ] | None = None 
+
     selected_wells: Optional[List[str]]  = Field(default=None)
     selected_subzone: str|None = Field(default = None, description="Selected subzone for filtering")
     selected_sectors: Optional[List[int]] | None  = Field(default=None, description="Selected sector for filtering")
@@ -23,14 +25,14 @@ class UIState(BaseModel):
 
     def data_filters_changed( self, new_input: Self )->bool:
         return (
-            self.sectors_selected != new_input.sectors_selected
-            or self.subzone_selected != new_input.subzone_selected
-            or self.wells_selected != new_input.wells_selected
+            self.selected_sectors != new_input.selected_sectors
+            or self.selected_subzone != new_input.selected_subzone
+            or self.selected_wells != new_input.selected_wells
         ) 
     
     def simulation_changed( self, new_input: Self )->bool:
         return (
-            self.simulation_selected != new_input.simulation_selected
+            self.selected_study != new_input.selected_study
         ) 
     
     def needs_data_reload( self, new_input: Self ):

@@ -41,7 +41,9 @@ print('imported')
 def azure_llm_if():
 
     endpoint = os.environ['AZURE_OPENAI_ENDPOINT']
-    model_name = "gpt-4o"
+    #model_name = "gpt-4o"
+    model_name = "gpt-4.1"
+    
     deployment = "gpt-4"
 
     #model_name = "gpt-4o-mini"

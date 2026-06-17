@@ -4,18 +4,16 @@ from functools import wraps
 from typing_extensions import Self
 from typing import Any, Dict, List, Iterable, Literal, Union, Optional,TypedDict
 from typing_extensions import Self
-
-from VisualizationSystem.visualization_backend.global_models import UIState
-from VisualizationSystem.visualization_backend.analyst.prompts import planner_prompt3
-from VisualizationSystem.visualization_backend.analyst.analyst_models import * 
+from visualization_system.visualization_backend.global_models import UIState
+from visualization_system.visualization_backend.analyst.prompts import planner_prompt3
+from visualization_system.visualization_backend.analyst.analyst_models import * 
 
 from langgraph.graph import END, StateGraph
 from langchain_core.tools import StructuredTool, Tool
 from langchain.agents import create_agent
  
 
-from VisualizationSystem.visualization_backend.analyst.analyst_models import ExecutorState
-
+ 
 
 @dataclass 
 class PlannerConfig:
@@ -98,10 +96,12 @@ class AgenticSystem:
         self._llm: Any | None = None
         self.app: Any | None = None
 
+        
         self.sql_analyst_config: SQLAnalystConfig = SQLAnalystConfig()
         self.sql_tools = None 
 
-        self.last_query: UIState | None = None#UIState( project_name="NoSet", query="Nothing")
+        print("Constructing the AgenticSystem")
+        self.last_query =  UIState( project_name="NoSet", query="Nothing") # type: ignore
  
 
 
