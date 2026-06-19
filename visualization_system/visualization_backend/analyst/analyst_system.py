@@ -107,8 +107,7 @@ class AgenticSystem:
 
     def __init__(self):
         self.planner_config: PlannerConfig = PlannerConfig()
-        self.data_analysis_config: SQLAnalystConfig = SQLAnalystConfig()
-
+        
         self.direct_answer_config = DirectAnswerConfig() 
 
         self.graph = StateGraph(ExecutorState)
@@ -116,6 +115,7 @@ class AgenticSystem:
         self.app: Any | None = None
 
         self.smart_data = SmartData()
+        self.data_analysis_config: SQLAnalystConfig = SQLAnalystConfig()
         self.smart_data_tools_object = SmartDataTools(self.smart_data)
         self.smart_data_agent_tools = self.smart_data_tools_object.get_tools() 
         self.sql_tools  = self.smart_data_agent_tools
@@ -192,6 +192,7 @@ class AgenticSystem:
         return self.app
 
     def planner_node(self, state: ExecutorState):
+
         user_query = state["user_query"]
 
         messages = [
@@ -243,35 +244,6 @@ class AgenticSystem:
         print("Router returening ",plan.tasks[task_index].tool )
         return plan.tasks[task_index].tool
 
-    def xxxanalyst_agent_node(self, state: ExecutorState):
-
-        plan, task, task_index = self._dummy_worker_node(state)
-        result = f"[analyst node executed : {task.instruction}]"
-        previous_context = state.get("aggregated_context") or ""
-
-        print(100*'=')
-        print("Analyst")
-        
-
-        agent = create_agent(
-        model=self.llm,
-        tools=self.sql_tools,             
-        system_prompt= self.sql_analyst_prompt, 
-        checkpointer=None,     # stateless
-        #response_format=SystemPlan
-        )
-
-    
-        analyst_response = agent.invoke({"messages": [{"role": "user", "content": task.instruction}]})
-        print(analyst_response['messages'][-1].content)
-        print(100*'=')
-        
-        return {
-            "aggregated_context": previous_context + 'Analyst',
-            "task_index": task_index + 1,
-            "analyst_response": analyst_response
-        }
-
     def explanation_rag_node(self, state: ExecutorState):
         
         plan, task, task_index = self._dummy_worker_node(state)
@@ -281,17 +253,7 @@ class AgenticSystem:
             "aggregated_context": previous_context + result,
             "task_index": task_index + 1,
         }
-
-    def xxxproject_structure_agent_node(self, state: ExecutorState):
-        
-        plan, task, task_index = self._dummy_worker_node(state)
-        result = f"[project_structure_agent_node]: {task.instruction}"
-        previous_context = state.get("aggregated_context") or ""
-        return {
-            "aggregated_context": previous_context + result,
-            "task_index": task_index + 1,
-        }
-
+    
     def _dummy_worker_node(self, state: ExecutorState):
         plan = state["plan"]
         task_index = state["task_index"]
@@ -451,7 +413,7 @@ class AgenticSystem:
 
         response = agent.invoke({
             "messages": [
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": task.instruction}
             ]
         })
 
@@ -460,20 +422,27 @@ class AgenticSystem:
         print(result)
         print(100*'=')
 
-        # the response can be one or more tables.
+        # in this node, the response can be one or more tables.
         # we get the tables as a dataframe as in that way, downstream plotting tools 
         # dont need to know whats an AgentTableResponse
         # we store those df results as data_results. All nodes store data_results
 
-        # we also store tool_outputs which are condensed (cheap) text sequences 
+        # we store cheap_tool_outputs which are condensed (cheap) text sequences 
         # that can be used as background info for the conversation
         # e.g. data analyst: table xx created... description...etc 
-        # if the table is small, we convert it to text and add the text to tool_outputs 
-        # these tool_outputs become "facts" and facts are added to all the prompts 
-        # of all the nodes including the planner. The key is that they are cheap short text 
+        # or fact: fluid used is water at room temperature with density 1.0gr/cr3
+        # 
+        # for the data analyst, for instance, if a table produced is small the 
+        #we convert it to text and add the text to cheap_tool_outputs
+        # 
+        # The key is that they are cheap short text sequences that can be used in prompts as 
         # added as CONVERSATION HISTORY: ...etc...
         # that helps to keep context (facts) across a single conversation 
-        #  
+        
+        # Tools can also return heavy objects (tables, dataframes, etc)
+        # One single step like the analyst can return a list of 3 tables for instance. 
+        # We should store them to because downstream tasks could need the data (such as a presenter component)
+        #   
            
 
 
