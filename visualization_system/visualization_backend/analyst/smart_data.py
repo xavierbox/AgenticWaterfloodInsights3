@@ -9,8 +9,8 @@ from typing import Any, Dict
 import yaml
 import pandas as pd, numpy as np
 
-from runtime.v4.analyst_agent.catalog import Catalog
-from runtime.v4.analyst_agent.smart_data_tools  import SmartDataTools
+from visualization_system.visualization_backend.analyst.catalog import Catalog
+from visualization_system.visualization_backend.analyst.smart_data_tools  import SmartDataTools
 
 class SmartData:
 
@@ -129,11 +129,11 @@ class SmartData:
             self.clear()
             raise
 
-    @staticmethod
-    def init_from_semantic_models( table_models: List[TableCard]):
+    #@staticmethod
+    def init_from_semantic_models( self,table_models: List[TableCard]):
 
-        smart_data = SmartData()
-
+        smart_data = self#, SmartData()
+        
         try:
             
             known_table_models = { t.name: t for t in table_models } 
@@ -144,7 +144,7 @@ class SmartData:
             smart_data.clear()
             raise
 
-        return smart_data
+        #return smart_data
 
 
     @staticmethod
@@ -172,7 +172,7 @@ class SmartData:
 
         return smart_data
 
-    def catalog_snapshot(self, input_tables: None | str | List[str] = None) -> CatalogTablesSnapshot:
+    def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None) -> CatalogTablesSnapshot:
         """
         Returns schema and description of all tables (base and derived) in the database
         """
@@ -181,7 +181,7 @@ class SmartData:
         if isinstance(input_tables, str):
             card = self._catalog.tables[input_tables]
             return self._catalog.snapshot(card)
-        if isinstance(input_tables, List):
+        if isinstance(input_tables, Iterable):
             cards = [self._catalog.tables[name] for name in input_tables]
             return self._catalog.snapshot(cards)
         raise TypeError(f"{type(input_tables).__name__} is not supported")
@@ -213,4 +213,4 @@ class SmartData:
         return self.conn.execute(f"SELECT * FROM {table_name}").fetchdf()
 
     def get_df( self, table_name:str )->pd.DataFrame:
-        return self.get_table_as_df( table_name )
+        return self.get_table_as_df( self, table_name )

@@ -2,11 +2,9 @@
 from  typing import List, Any, Optional, Iterable, Literal
 from pydantic import BaseModel,Field
 
-from pydantic import BaseModel, Field, ConfigDict
+
 
 class PlanStep(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     step_id: int
     target_table: str
     source_tables: List[str]
@@ -14,8 +12,6 @@ class PlanStep(BaseModel):
     logic: str
 
 class ExecutionPlan(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     #raw_query: str 
     user_query: str
     refined_query: Optional[str] = None 
@@ -23,13 +19,10 @@ class ExecutionPlan(BaseModel):
     steps: List[PlanStep]
 
 class TableItemAgentResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
     table_name: str = Field(description="Name of a materialized output table")
     description: str = Field(description="Brief summary of the table contents")
         
-
 class AgentTableResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
     # Literal ensures the LLM chooses only these specific strings
     agent: Literal["analyst"] = Field(
         default="analyst", 
@@ -50,8 +43,6 @@ class AgentTableResponse(BaseModel):
     #tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
    
 class AgentTableResponse1(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     # Literal ensures the LLM chooses only these specific strings
     agent: Literal["analyst"] = Field(
         default="analyst", 

@@ -139,6 +139,12 @@ def run_agent_stream_values(
     print("\n--- STREAM ENDED ---")
     return last_state
 
+
+
+
+
+
+
 iii = """I want to compare the liquid production cummulated among wells for which the 
 distance to the closes injected is in the range 0-400, 400-800, 800-1200  . Only year 2018 
 """

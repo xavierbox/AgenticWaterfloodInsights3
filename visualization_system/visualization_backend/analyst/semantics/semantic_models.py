@@ -1,4 +1,7 @@
-{
+from pydantic import BaseModel, Field
+from typing import List, Optional, Literal
+
+semantic_catalog = {
     "tables": [
         {
             "name": "injectors",
@@ -9,57 +12,61 @@
                     "name": "DATE",
                     "data_type": "timestamp",
                     "description": "Injection date.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Injector well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "WATER_INJECTION_VOLUME",
                     "data_type": "float",
                     "description": "Injected water volume.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-     
+                    "derived_column": False,
+                    "business_rules": [
+                        "Typical values: LW, RW, UW, Unique."
+                    ]
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-         
+                    "derived_column": False,
+                    "business_rules": [
+                        "Integer sector id."
+                    ]
                 },
                 {
                     "name": "YEAR",
                     "data_type": "integer",
                     "description": "Year from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "MONTH",
                     "data_type": "integer",
                     "description": "Month from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "DAY",
                     "data_type": "integer",
                     "description": "Day from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 }
             ],
             "relationships": [
@@ -83,78 +90,82 @@
                     "name": "DATE",
                     "data_type": "timestamp",
                     "description": "Production date.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Producer well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "LIQUID_VOLUME",
                     "data_type": "float",
                     "description": "Total produced liquid.",
-                    "derived_column": false
-                   
+                    "derived_column": False,
+                    "business_rules": [
+                        "Approx = WATER + OIL + GAS."
+                    ]
                 },
                 {
                     "name": "WATER_VOLUME",
                     "data_type": "float",
                     "description": "Produced water.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "GAS_VOLUME",
                     "data_type": "float",
                     "description": "Produced gas.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "OIL_VOLUME",
                     "data_type": "float",
                     "description": "Produced oil.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-                   
+                    "derived_column": False,
+                    "business_rules": [
+                        "Typical values: LW, RW, UW, Unique."
+                    ]
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "YEAR",
                     "data_type": "integer",
                     "description": "Year from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "MONTH",
                     "data_type": "integer",
                     "description": "Month from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "DAY",
                     "data_type": "integer",
                     "description": "Day from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 }
             ],
             "relationships": [
@@ -178,43 +189,45 @@
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "X",
                     "data_type": "float",
                     "description": "X coordinate.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "Y",
                     "data_type": "float",
                     "description": "Y coordinate.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-                      
+                    "derived_column": False,
+                    "business_rules": []
                 },
                 {
                     "name": "WELL_TYPE",
                     "data_type": "string",
                     "description": "Injector or Producer.",
-                    "derived_column": false
-                    
+                    "derived_column": False,
+                    "business_rules": [
+                        "Allowed: Injector, Producer."
+                    ]
                 }
             ],
             "relationships": [
@@ -385,3 +398,108 @@
         }
     ]
 }
+
+idioms = {
+     "duckdb": {
+          "date subtraction": "Use column - INTERVAL 'X days/months'. NEVER use DATE_SUB() or DATEADD().",
+          "date truncation": "Use DATE_TRUNC('month', column).",
+          "reserved keywords": "Always wrap the column name \"DATE\" in double quotes to avoid Binder Errors.",
+          "string concatenation": "Use the || operator or CONCAT().",
+          "boolean aggregation": "Use FILTER clauses or BOOL_OR() / BOOL_AND() for cleaner logic.",
+          "nested aggregates": "Avoid nested aggregates\u2014never wrap MAX/MIN inside SUM/AVG/etc. Example: WITH current_year AS (SELECT EXTRACT(YEAR FROM MAX(\"DATE\")) AS year FROM injectors), yearly_totals AS (...), yoy AS (...) SELECT ... FROM ... WHERE YEAR = (SELECT year FROM current_year)",
+          "cte helpers": "Use CTEs to capture helper scalars (like current_year via MAX(\"DATE\")) before performing group aggregations. For example:\n    WITH current_year AS (SELECT EXTRACT(YEAR FROM MAX(\"DATE\")) AS year FROM injectors),\n         yearly_totals AS (...),\n         yoy AS (...)\n    SELECT ... FROM ... WHERE YEAR = (SELECT year FROM current_year)"
+     }
+}
+
+class ColumnCard(BaseModel):
+    name: str = Field(description = 'column name')
+    data_type: str 
+    description: Optional[str] = Field( default = None, description = "meaning of the data in the column")
+    derived_column: Optional[bool] = Field( default = False, description="True if column was generated, calculated, or created by an agent")
+    #is_categorical: Optional[bool] = Field(description='True if the column contains categorical values and False otherwise')
+    #business_rules: List[str] = Field(default_factory=list, description="Actionable business rules for this column, one rule per item.")
+
+
+class SQLExample(BaseModel):
+    name: str = Field(description="Short name for the SQL example.")
+    purpose: str = Field(description="What this query demonstrates or answers.")
+    sql: str = Field(description="Executable SQL snippet.")
+    notes: Optional[str] = Field(
+        default=None,
+        description="Optional assumptions, caveats, or interpretation guidance."
+    )
+
+
+class Relationship(BaseModel):
+    tables_involved: List[str] = Field(description="Tables participating in the relationship, typically [left_table, right_table].")
+    join_type: Literal["inner", "left", "right", "full", "cross"] = Field(
+        description="Recommended SQL join type for combining the tables."
+    )
+    join_condition: Optional[str] = Field(
+        default=None,
+        description=("SQL join condition, for example \"injectors.NAME = locations.NAME AND locations.WELL_TYPE = 'Injector'\". "))
+    description: Optional[str] = Field(default=None,description="Business meaning of this relationship.")
+
+
+class TableCard(BaseModel):
+    name : str = Field( description = "table name")
+    description : str = Field( description = "brief description of table contents")
+    kind : Optional[Literal[ 'base', 'derived']] = Field( description = "wheather this is a base table or a derived one")
+    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
+    row_count: Optional[int] = Field(default=None, description = "number of rows")
+
+
+    columns: List[ColumnCard] = Field(
+        default_factory=list,
+        description="Semantic metadata for columns in this table."
+    )
+    relationships: List[Relationship] = Field(
+        default_factory=list,
+        description="Relationships from this table to other tables."
+    )
+    #sql_examples: List[SQLExample] = Field(
+    #    default_factory=list,
+    #    description="Representative SQL queries relevant to this table."
+    #) 
+
+class CatalogTablesSnapshot(BaseModel):
+    
+    base_tables: Optional[List[TableCard]] = Field( default=None)
+    derived_tables: Optional[List[TableCard]] = Field( default=None)
+    
+
+
+#class LoadedTableCard( TableCard ):
+#    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
+#    row_count: Optional[int] = Field(default=None, description = "number of rows")
+
+
+
+class QueryCatalogItem(BaseModel):
+    id: str = Field(description="Stable identifier for the query pattern.")
+    question: str = Field(description="Natural-language intent answered by the query.")
+    tables: List[str] = Field(default_factory=list, description="Tables used by the query.")
+    sql: str = Field(description="Executable SQL query.")
+    tags: List[str] = Field(default_factory=list, description="Search tags for retrieval/routing.")
+    notes: Optional[str] = Field(default=None, description="Optional caveats or engine-specific guidance.")
+
+
+class SemanticCatalog(BaseModel):
+    semantic_constraints: List[str] = Field(default_factory=list, description="Global semantic constraints for the domain.")
+    tables: List[TableCard] = Field(default_factory=list, description="Table metadata cards.")
+    query_catalog: Optional[List[QueryCatalogItem]] = Field(default = None, description="Reusable SQL query templates.")
+
+class SQLIdiom(BaseModel):
+    topic: str = Field(description="Topic area for the SQL idiom.")
+    rule: str = Field(description="Recommended SQL idiomatic rule.")
+    examples: List[str] = Field(default_factory=list, description="Short SQL snippets that illustrate the rule.")
+    notes: Optional[str] = Field(default=None, description="Optional caveats for the SQL dialect.")
+
+class SQLIdiomsCatalog(BaseModel):
+    dialect: str = Field(description="SQL dialect the idioms target.")
+    idioms: List[SQLIdiom] = Field(default_factory=list, description="Dialect-specific SQL idioms.")
+
+class SemanticContext(BaseModel):
+    definitions: List[str] = Field(default_factory=list, description="Canonical definitions for domain terms.")
+    business_rules: List[str] = Field(default_factory=list, description="Business-level rules and policies.")
+    domain_knowledge: List[str] = Field(default_factory=list, description="General domain guidance and assumptions.")

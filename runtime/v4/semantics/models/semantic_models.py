@@ -1,8 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
+from pydantic import BaseModel, ConfigDict
+
 
 
 class ColumnCard(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     name: str = Field(description = 'column name')
     data_type: str 
     description: Optional[str] = Field( default = None, description = "meaning of the data in the column")
@@ -33,6 +36,7 @@ class Relationship(BaseModel):
 
 
 class TableCard(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     name : str = Field( description = "table name")
     description : str = Field( description = "brief description of table contents")
     kind : Optional[Literal[ 'base', 'derived']] = Field( description = "wheather this is a base table or a derived one")
@@ -54,7 +58,7 @@ class TableCard(BaseModel):
     #) 
 
 class CatalogTablesSnapshot(BaseModel):
-    
+    model_config = ConfigDict(extra="forbid")
     base_tables: Optional[List[TableCard]] = Field( default=None)
     derived_tables: Optional[List[TableCard]] = Field( default=None)
     
@@ -67,6 +71,7 @@ class CatalogTablesSnapshot(BaseModel):
 
 
 class QueryCatalogItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: str = Field(description="Stable identifier for the query pattern.")
     question: str = Field(description="Natural-language intent answered by the query.")
     tables: List[str] = Field(default_factory=list, description="Tables used by the query.")
@@ -76,6 +81,7 @@ class QueryCatalogItem(BaseModel):
 
 
 class SemanticCatalog(BaseModel):
+    #model_config = ConfigDict(extra="forbid")
     semantic_constraints: List[str] = Field(default_factory=list, description="Global semantic constraints for the domain.")
     tables: List[TableCard] = Field(default_factory=list, description="Table metadata cards.")
     query_catalog: Optional[List[QueryCatalogItem]] = Field(default = None, description="Reusable SQL query templates.")
@@ -91,6 +97,7 @@ class SemanticCatalog(BaseModel):
 #    idioms: List[SQLIdiom] = Field(default_factory=list, description="Dialect-specific SQL idioms.")
 
 class SemanticContext(BaseModel):
+    #model_config = ConfigDict(extra="forbid")
     definitions: List[str] = Field(default_factory=list, description="Canonical definitions for domain terms.")
     business_rules: List[str] = Field(default_factory=list, description="Business-level rules and policies.")
     domain_knowledge: List[str] = Field(default_factory=list, description="General domain guidance and assumptions.")

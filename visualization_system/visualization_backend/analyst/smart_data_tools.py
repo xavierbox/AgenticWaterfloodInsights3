@@ -1,76 +1,18 @@
 from __future__ import annotations
-from runtime.v4.analyst_agent.catalog import * 
+from visualization_system.visualization_backend.analyst.catalog import * 
 #from runtime.v4.analyst_agent.smart_data import SmartData
 
 from typing import Dict, List, Tuple, Optional, Any 
 from langchain_core.tools import StructuredTool, Tool
 from typing import Iterable
-import inspect
-from pydantic import BaseModel, ConfigDict, create_model
-from langchain_core.tools import StructuredTool
-
+ 
 import inspect
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from runtime.v4.analyst_agent.smart_data import SmartData
-
-from pydantic import create_model, ConfigDict
-
-def make_args_schema(func):
-    sig = inspect.signature(func)
-
-    fields = {}
-    for name, param in sig.parameters.items():
-        if name == "self":
-            continue
-
-        annotation = param.annotation
-        if annotation is inspect.Parameter.empty:
-            annotation = str  # fallback
-
-        default = param.default
-        if default is inspect.Parameter.empty:
-            default = ...
-
-        fields[name] = (annotation, default)
-
-    # --- UPDATED CONFIG ENGINE FOR STRICT OPENAI SCHEMA ---
-    config = ConfigDict(
-        extra="forbid",
-        json_schema_extra={"additionalProperties": False}  # Forces false even on empty fields dicts
-    )
-
-    return create_model(
-        f"{func.__name__}Args",
-        __config__=config,
-        **fields,
-    )
+    from visualization_system.visualization_backend.analyst.smart_data import SmartData
 
 
-def old_make_args_schema(func):
-    sig = inspect.signature(func)
-
-    fields = {}
-    for name, param in sig.parameters.items():
-        if name == "self":
-            continue
-
-        annotation = param.annotation
-        if annotation is inspect.Parameter.empty:
-            annotation = str  # fallback
-
-        default = param.default
-        if default is inspect.Parameter.empty:
-            default = ...
-
-        fields[name] = (annotation, default)
-
-    return create_model(
-        f"{func.__name__}Args",
-        __config__=ConfigDict(extra="forbid"),
-        **fields,
-    )
 
 class SmartDataTools:
 
@@ -157,7 +99,7 @@ class SmartDataTools:
 
     def catalog_snapshot(
         self,
-        input_tables: None | str | List[str] = None
+        input_tables: None | str | Iterable[str] = None
     ) -> str:
         """
         Return an LLM-friendly textual snapshot of the data catalog.
@@ -168,14 +110,14 @@ class SmartDataTools:
 
         Parameters
         ----------
-        input_tables : None | str | List[str], optional
+        input_tables : None | str | Iterable[str], optional
             Tables to include in the snapshot.
 
             - None:
                 Include all tables in the catalog.
             - str:
                 Include only the table with this name.
-            - List[str]:
+            - Iterable[str]:
                 Include only the listed table names.
 
         Returns
@@ -190,6 +132,7 @@ class SmartDataTools:
         # =====================================================
 
         snapshot = self._data.catalog_snapshot(input_tables)
+        print(snapshot)
         return self.format_catalog_snapshot( snapshot )
 
     def _get_table_names( self ):
@@ -223,20 +166,18 @@ class SmartDataTools:
             if not attr.__doc__:
                 continue
 
-            args_schema = make_args_schema(attr)
+
             if callable(attr) and attr.__doc__:
                 tools.append(
                     StructuredTool.from_function(
                         func=attr,
                         name=name,
                         description=inspect.getdoc(attr),
-                        args_schema=args_schema
-
                     )
                 )
         return tools
     
-    def materialize_select( self, table_name:str , rows:int = 20 )->str:
+    def materialize_select( self, table_name, rows )->str:
         """
         Return a full table to produce a textual response. 
         **Do not call this tool ** unless the table has less than 20 rows
@@ -258,18 +199,9 @@ class SmartDataTools:
         if exists == 0:
             raise ValueError(f"Table '{table_name}' does not exist in DuckDB")
 
-
-
-        try:
-            rows = int(rows)
-        except (TypeError, ValueError):
-            return "Invalid rows value. rows must be an integer between 1 and 20, not '*'."
-
-        limit = max(1, min(20, rows))
-
         # Safe quoting for table names
         safe_name = table_name.replace('"', '""')
-        #limit = min(20, int(rows))
+        limit = min(20, int(rows))
         return self._data.conn.execute(f'SELECT * FROM "{safe_name}" LIMIT {limit}').fetchdf().to_string()
 
     def sql_materialize( self, sql:str, materialized_table_name:str, detailed_table_description:str ):

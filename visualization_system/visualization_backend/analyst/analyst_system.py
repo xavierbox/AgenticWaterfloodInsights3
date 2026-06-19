@@ -4,16 +4,29 @@ from functools import wraps
 from typing_extensions import Self
 from typing import Any, Dict, List, Iterable, Literal, Union, Optional,TypedDict
 from typing_extensions import Self
-from visualization_system.visualization_backend.global_models import UIState
-from visualization_system.visualization_backend.analyst.prompts import planner_prompt3
-from visualization_system.visualization_backend.analyst.analyst_models import * 
+
 
 from langgraph.graph import END, StateGraph
 from langchain_core.tools import StructuredTool, Tool
 from langchain.agents import create_agent
- 
+from langchain.agents.structured_output import ToolStrategy
+
 
  
+
+
+from visualization_system.visualization_backend.global_models import UIState
+from visualization_system.visualization_backend.analyst.prompts import planner_prompt3 
+from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
+
+
+from visualization_system.visualization_backend.analyst.analyst_models import * 
+
+from visualization_system.visualization_backend.analyst.smart_data import SmartData
+from visualization_system.visualization_backend.analyst.catalog import Catalog
+from visualization_system.visualization_backend.analyst.smart_data_tools  import SmartDataTools
+
+
 
 @dataclass 
 class PlannerConfig:
@@ -37,12 +50,16 @@ def make_llm_calling_node(node, llm):
 @dataclass 
 class SQLAnalystConfig:
     
-    prompt :str = "You are an analyst that reponds to quantitative questions about the data"
+    prompt_template :str = anayst_prompt_template #depends on idioms, constraints, etc.
+    prompt: str | None = None     
 
-    reference_density: float = 1.0 
+    def build_prompt( self, few_shot_examples = None , background = None ):
+        '''
+        builds the data_analyst prompt using all the semantics + 
+        few_shot examples if any and background info if any
+        '''
+        pass 
 
-    def updateDensity( self, value:float ):
-        self.reference_density = value 
 
 
 
@@ -90,20 +107,24 @@ class AgenticSystem:
 
     def __init__(self):
         self.planner_config: PlannerConfig = PlannerConfig()
+        self.data_analysis_config: SQLAnalystConfig = SQLAnalystConfig()
+
         self.direct_answer_config = DirectAnswerConfig() 
 
         self.graph = StateGraph(ExecutorState)
         self._llm: Any | None = None
         self.app: Any | None = None
 
+        self.smart_data = SmartData()
+        self.smart_data_tools_object = SmartDataTools(self.smart_data)
+        self.smart_data_agent_tools = self.smart_data_tools_object.get_tools() 
+        self.sql_tools  = self.smart_data_agent_tools
         
-        self.sql_analyst_config: SQLAnalystConfig = SQLAnalystConfig()
-        self.sql_tools = None 
-
+        #self.sql_analyst_config: SQLAnalystConfig = SQLAnalystConfig()
+        
         print("Constructing the AgenticSystem")
         self.last_query =  UIState( project_name="NoSet", query="Nothing") # type: ignore
  
-
 
     @property
     def llm(self):
@@ -124,8 +145,8 @@ class AgenticSystem:
         return self.planner_config.prompt
 
     @property
-    def sql_analyst_prompt(self):
-        return self.sql_analyst_config.prompt
+    def data_analyst_prompt(self):
+        return self.data_analysis_config.prompt
 
     def create_graph(self):
         graph = self.graph
@@ -358,7 +379,7 @@ class AgenticSystem:
         state: ExecutorState,
         tool_name: str,
         task: SystemTask,
-        result: str,
+        result: Any,
         context_key: str | None = None,
     ):
         previous_outputs = state.get("tool_outputs") or []
@@ -416,42 +437,54 @@ class AgenticSystem:
         )
     
     def data_analysis_node(self, state: ExecutorState):
-        _, task, _ = self._get_current_task(state)
+        plan, task, task_index = self._get_current_task(state)
 
-        prompt = f"""
-    Task:
-    {task.instruction}
-
-    Known facts:
-    {state.get("facts_context") or ""}
-
-    RAG context:
-    {state.get("rag_context") or ""}
-
-    Use the available historical production/injection data tools to generate the requested quantitative result or plot.
-    """
+        analyst_prompt = self.data_analysis_config.prompt
 
         agent = create_agent(
-            model=self.llm,
-            tools=self.sql_tools,
-            system_prompt=self.sql_analyst_prompt,
-            checkpointer=None,
-        )
+                model = self.llm,
+                system_prompt=analyst_prompt,
+                tools = self.sql_tools,
+                response_format = ToolStrategy(AgentTableResponse),
+                #checkpointer= MemorySaver() 
+            )
 
-        analyst_response = agent.invoke({
+        response = agent.invoke({
             "messages": [
                 {"role": "user", "content": prompt}
             ]
         })
 
-        result = analyst_response["messages"][-1].content
+        result = response['structured_response']# response["messages"][-1].content
+        print(100*'=')
+        print(result)
+        print(100*'=')
+
+        # the response can be one or more tables.
+        # we get the tables as a dataframe as in that way, downstream plotting tools 
+        # dont need to know whats an AgentTableResponse
+        # we store those df results as data_results. All nodes store data_results
+
+        # we also store tool_outputs which are condensed (cheap) text sequences 
+        # that can be used as background info for the conversation
+        # e.g. data analyst: table xx created... description...etc 
+        # if the table is small, we convert it to text and add the text to tool_outputs 
+        # these tool_outputs become "facts" and facts are added to all the prompts 
+        # of all the nodes including the planner. The key is that they are cheap short text 
+        # added as CONVERSATION HISTORY: ...etc...
+        # that helps to keep context (facts) across a single conversation 
+        #  
+           
+
+
+        
 
         return self._append_output(
             state=state,
-            tool_name="data_plotter",
+            tool_name="data_analyst",
             task=task,
             result=result,
-            context_key="plot_context",
+            context_key="data_analyst"
         )
 
     def run_planner(self, user_query: str):
@@ -479,6 +512,29 @@ class AgenticSystem:
         }
 
         return self.planner_node(state)
+
+    def run_analyst(self, query: str):
+
+        analyst_prompt = self.data_analysis_config.prompt
+
+        agent = create_agent(
+                model = self.llm,
+                system_prompt=analyst_prompt,
+                tools = self.sql_tools,
+                response_format = ToolStrategy(AgentTableResponse),
+                #checkpointer= MemorySaver() 
+            )
+
+        response = agent.invoke({
+                    "messages": [
+                        {"role": "user", "content": query}    
+                    ]
+        })
+
+        return response
+
+
+
 
 
 

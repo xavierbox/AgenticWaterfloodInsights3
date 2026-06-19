@@ -1,4 +1,4 @@
-{
+semantic_catalog = {
     "tables": [
         {
             "name": "injectors",
@@ -9,57 +9,61 @@
                     "name": "DATE",
                     "data_type": "timestamp",
                     "description": "Injection date.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Injector well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "WATER_INJECTION_VOLUME",
                     "data_type": "float",
                     "description": "Injected water volume.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-     
+                    "derived_column": false,
+                    "business_rules": [
+                        "Typical values: LW, RW, UW, Unique."
+                    ]
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-         
+                    "derived_column": false,
+                    "business_rules": [
+                        "Integer sector id."
+                    ]
                 },
                 {
                     "name": "YEAR",
                     "data_type": "integer",
                     "description": "Year from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "MONTH",
                     "data_type": "integer",
                     "description": "Month from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "DAY",
                     "data_type": "integer",
                     "description": "Day from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 }
             ],
             "relationships": [
@@ -83,78 +87,82 @@
                     "name": "DATE",
                     "data_type": "timestamp",
                     "description": "Production date.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Producer well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "LIQUID_VOLUME",
                     "data_type": "float",
                     "description": "Total produced liquid.",
-                    "derived_column": false
-                   
+                    "derived_column": false,
+                    "business_rules": [
+                        "Approx = WATER + OIL + GAS."
+                    ]
                 },
                 {
                     "name": "WATER_VOLUME",
                     "data_type": "float",
                     "description": "Produced water.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "GAS_VOLUME",
                     "data_type": "float",
                     "description": "Produced gas.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "OIL_VOLUME",
                     "data_type": "float",
                     "description": "Produced oil.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-                   
+                    "derived_column": false,
+                    "business_rules": [
+                        "Typical values: LW, RW, UW, Unique."
+                    ]
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "YEAR",
                     "data_type": "integer",
                     "description": "Year from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "MONTH",
                     "data_type": "integer",
                     "description": "Month from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "DAY",
                     "data_type": "integer",
                     "description": "Day from DATE.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 }
             ],
             "relationships": [
@@ -178,43 +186,45 @@
                     "name": "NAME",
                     "data_type": "string",
                     "description": "Well identifier.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "X",
                     "data_type": "float",
                     "description": "X coordinate.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "Y",
                     "data_type": "float",
                     "description": "Y coordinate.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "SUBZONE",
                     "data_type": "string",
                     "description": "Vertical subzone.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "SECTOR",
                     "data_type": "integer",
                     "description": "Geographic sector.",
-                    "derived_column": false
-                      
+                    "derived_column": false,
+                    "business_rules": []
                 },
                 {
                     "name": "WELL_TYPE",
                     "data_type": "string",
                     "description": "Injector or Producer.",
-                    "derived_column": false
-                    
+                    "derived_column": false,
+                    "business_rules": [
+                        "Allowed: Injector, Producer."
+                    ]
                 }
             ],
             "relationships": [
