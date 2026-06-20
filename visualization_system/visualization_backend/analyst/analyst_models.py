@@ -71,14 +71,17 @@ class SystemPlan(BaseModel):
         )
     )
 
-    needs_clarification: bool = Field(
-        default=False,
-        description="True when the user request is ambiguous and cannot be safely executed."
-    )
+    #needs_clarification: bool = Field(
+    #    default=False,
+    #    description="True when the user request is ambiguous and cannot be safely executed."
+    #)
 
-    clarification_question: str | None = Field(
+    clarification_request: str | None = Field(
         default=None,
-        description="Question to ask the user before executing any tasks."
+        description=(
+            "Clarification question/request to ask the user before executing any tasks. "
+            "If this is not None, execution must stop and ask the user for clarification."
+        ),
     )
 
     direct_answer: str | None = None
