@@ -18,6 +18,9 @@ from langchain.agents.structured_output import ToolStrategy
 from visualization_system.visualization_backend.global_models import UIState
 from visualization_system.visualization_backend.analyst.prompts import planner_prompt3 
 from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
+from visualization_system.visualization_backend.analyst.prompts import chart_agent_prompt 
+#
+
 
 
 from visualization_system.visualization_backend.analyst.analyst_models import * 
@@ -28,15 +31,16 @@ from visualization_system.visualization_backend.analyst.smart_data_tools  import
 
 
 
-@dataclass 
-class PlannerConfig:
-    prompt :str = planner_prompt3
+#@dataclass 
+#class PlannerConfig:
+#    prompt :str = planner_prompt3
 
 @dataclass 
 class DirectAnswerConfig:
     prompt :str =  ("Answer using stable general knowledge. "
                     "Be concise. Return reusable factual context."
                     "The user is a reservoir engineer")
+
 
 def make_llm_calling_node(node, llm):
     @wraps(node)

@@ -2,7 +2,9 @@ from __future__ import annotations
 from langchain_core.tools import StructuredTool, Tool
 #from StuffThatDidntWork import smart_data
 #from StuffThatDidntWork import smart_data
-from runtime.v4.semantics.semantic_models import * 
+#from runtime.v4.semantics.semantic_models import * 
+
+from visualization_system.visualization_backend.analyst.semantics.semantic_models import * 
 from typing import Iterable, Union
 import duckdb
 from typing import Any, Dict

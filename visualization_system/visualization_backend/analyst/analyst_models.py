@@ -30,8 +30,6 @@ class AgentTableResponse(BaseModel):
     #text : Optional[str]  = Field(default=None, description="textual response summarizing small tables")
     #tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
 
-
-
 class SystemTask(BaseModel):
     agent: Literal[
         "direct_answer",
