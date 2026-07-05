@@ -1,269 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Waterflood Insights Analytics</title>
+    <meta charset="UTF-8">
+    <title>Flask Starter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+    <!-- Optional Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script -->
+<!--script src="/static/plotly3.0.0/plotly.min.js"></script-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+
+</head>
+
+<script>
+    function Id(id){return document.getElementById(id)} 
+</script> 
+<script>const toggleLoading = (show, message = null) => { const el = document.getElementById("loading"); if (el) { el.classList.toggle('hidden', !show); if (show) document.getElementById('spinner-message').textContent = message ?? "Loading..."; } };</script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+
+<script src="{{ url_for('static', filename='js2/app_globals.js') }}"></script>
+<script src="{{ url_for('static', filename='plotly3.0.0/plotly.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/plotly_wrapper.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/app_components.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/app_layout.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/appearance.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/components.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/crm_setup_component.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/crm_results_component.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/initialize_app.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/charts_management.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/load_open_project_data.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/simulations.js') }}"></script>
+<script src="{{ url_for('static', filename='js2/chatbox.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js2/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js2/splash-styles.css') }}">
 
 <style>
-    .hidden {
-  display: none !important;
-}
-        .tela-logo {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #00e0ff, #1532ff 55%, #00d084);
-    }
-
-    :root[data-theme="light"] {
---projects-component-left-backgound:
-linear-gradient(
-  160deg,
-  color-mix(in srgb, var(--background-color) 70%, var(--primary-color)) 0%,
-  var(--primary-color) 35%,
-  var(--secondary-color) 100%
-);
-    
-    --background-color: white;
-    --tint-color: smokewhite;
-    --primary-color: rgb(0,0,220);
-    --secondary-color: lightblue;
-    --contrast-color: rgb(255,123,0);
-    --hover-color: lightblue;
-
-    --text-on-primary-color: white;
-    --text-color: rgb(5,5,47);
-
-    --pane-color: white;
-    --pane-bg: white;
-    --pane-border: lightgrey;
-    --bg-gradient: linear-gradient(180deg,white, white); /*#ffffff,#f6f6f6);*/
-    
-    --card-color: white;
-
-    --input-background-color: white; /*rgb(192,192,193);*/
-    --input-text-color: black;
-
-    --separator-color: lightgrey;
-    --separator-hover-color: black;
-    
-    --card-gradient-start: white; /*ffffff;*/
-    --card-gradient-end:  white; /* dfe8f7;*/
-    
-    --fit-poor-bg: #ff7a7a;     /* much lighter red for contrast */
-    --fit-poor-text: #1E1E1E;    
-    
- --injector-producer-table-bg: white; 
-    
-    --info-card-border: lightgrey;
-    
-    
-}
-
-/* DARK THEME */
-:root[data-theme="dark"] {
-
---projects-component-left-backgound:
-linear-gradient(
-  160deg,
-  color-mix(in srgb, var(--background-color) 40%, var(--contrast-color)) 10%,
-  var(--primary-color) 45%,
-  var(--hover-color) 100%
-);
-    
-    
-    
-    --background-color: rgb(6,6,6);
-    --tint-color: rgb(41,37,37);
-    --primary-color: rgb(8,8,10);
-    --secondary-color: rgb(59,55,55);
-    --contrast-color: rgb(244,103,2);
-    --hover-color: #0d6efd;
-
-    --text-on-primary-color: rgb(174,171,171);
-    --text-color: rgb(197,194,194);
-
-    --pane-color: rgb(28,24,24);
-    --card-color: rgb(45,43,43);
-
-    --input-background-color: rgb(18,17,17);
-    --input-text-color: rgb(202,200,200);
-
-    --separator-color: rgb(78,70,70);
-    --separator-hover-color: var(--hover-color);
-    
-    --card-gradient-start: #3a3a3a;
-    --card-gradient-end: #121212;
-    
-    --fit-poor-bg: #8b0000;     /* much darker red for contrast */
-    --fit-poor-text: #ffffff;
-    --bg-gradient:
-    radial-gradient(circle at 20% 10%, #111 0%, transparent 40%),
-    linear-gradient(180deg,#0a0a0a,#020202);
-
-        --pane-bg: rgb(28,24,24);
-    --pane-border: rgb(78,70,70);
-    
-     --injector-producer-table-bg: rgb(45,43,43);
-      --info-card-border: rgb(78,70,70);
-}
-
-
-/*neon-blue"*/
-:root[data-theme="neon-light"]{
-
-    --projects-component-left-backgound: transparent;/*
-linear-gradient(
-  160deg,
-  color-mix(in srgb, var(--background-color) 40%, var(--hover-color)) 10%,
-  var(--primary-color) 45%,
-  var(--secondary-color) 100%
-);*/
-    
-    
-    /* BACKGROUND */
-    --bg-gradient:
-        radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
-        radial-gradient(circle at 80% 80%, #00c6ff 0%, transparent 40%),
-        linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
-
-    /* SURFACES (glass panels) */
-    --glass-bg: rgba(12, 28, 78, 0.55);
-    --glass-border: rgba(255,255,255,0.15);
-
-    /* CARD */
-
-
-    --separator-color: rgb(78,70,70);
-    --separator-hover-color: var(--hover-color);
-    
-    /* ACCENTS */
-    /*--primary-color: #3b82f6;*/
-    --primary-color: rgb(8,8,10);
-    
-    --accent-color: #00e5ff;
-    /*--hover-color: #5aa2ff;*/
-        --hover-color: #0d6efd;
-    
-    --input-background-color: white; /*rgb(192,192,193);*/
-    --input-text-color: black;
-        --fit-poor-bg: #8b0000;     /* much darker red for contrast */
-    --fit-poor-text: #ffffff;
-
-    /* TEXT */
-    --text-color: #e6ecff;
-    --text-muted: #9bb4ff;
-
-    /* INPUTS */
-    --input-bg: rgba(255,255,255,0.08);
-    
- --background-color: #001c5c;
-    --pane-color: var(--glass-bg);
-    --pane-bg: var(--glass-bg);
-    --pane-border: var(--glass-border);
-
-    --card-gradient-start: #102a7a;
-    --card-gradient-end: #001b52;
-    --card-color: #102a7a;
-        --card-bg: linear-gradient(135deg,#102a7a,#001b52);
-    --card-glow: 0 0 20px rgba(70,120,255,0.35);
-    
-
-    --separator-hover-color: #5aa2ff;
-        
-    --injector-producer-table-bg: transparent;
-    
- 
-    --info-card-border: var(--glass-border);
-}
-
-:root[data-theme="neon-dark"] {
-    --projects-component-left-backgound:transparent; 
-    
-    --background-color: rgb(6,6,6);
-    --tint-color: rgb(41,37,37);
-    --primary-color: rgb(8,8,10);
-    --secondary-color: rgb(59,55,55);
-    --contrast-color: rgb(244,103,2);
-    --hover-color: #0d6efd;
-
-    --text-on-primary-color: rgb(174,171,171);
-    --text-color: rgb(197,194,194);
-
-    --pane-color: var(--glass-bg);
-    --pane-bg: var(--glass-bg);
-    --pane-border: var(--glass-border);
-    
-    --card-color: rgb(45,43,43);
-
-    --input-background-color: rgb(18,17,17);
-    --input-text-color: rgb(202,200,200);
-
-    --separator-color: rgb(78,70,70);
-    --separator-hover-color: rgb(156,156,156);
-
-    --card-gradient-start: #1f2f70;
-    --card-gradient-end: #060a22;
-
-    --card-glow:
-        0 0 18px rgba(0,120,255,0.45),
-        0 0 35px rgba(0,255,210,0.25);
-
-    --card-bg: linear-gradient(135deg,#102a7a,#001b52);
-    
-    --fit-poor-bg: #8b0000;
-    --fit-poor-text: #ffffff;
-
-    /*--bg-gradient:
-    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
-    radial-gradient(circle at 80% 80%, #00635a 0%, transparent 40%),
-    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
-    */
-    
-    
-    /*kinematic*/
-    --bg-gradient:
-    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
-    radial-gradient(circle at 80% 80%, #4b0082 0%, transparent 40%),
-    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
-
-    
-    
-    /*
-    --bg-gradient:
-    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
-    radial-gradient(circle at 80% 80%, #3b006e 0%, transparent 40%),
-    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);
-    */
-
-    
-    /*--bg-gradient:
-    radial-gradient(circle at 20% 10%, #1a3cff 0%, transparent 35%),
-    radial-gradient(circle at 80% 80%, #007a6e 0%, transparent 40%), 
-    linear-gradient(135deg,#020b2a,#001c5c,#003a9f);*/
-    
-
-    
-    /*--bg-gradient:
-        radial-gradient(circle at 15% 18%, rgba(0,120,255,0.55) 0%, transparent 38%),
-        radial-gradient(circle at 82% 80%, rgba(0,255,210,0.35) 0%, transparent 40%),
-        radial-gradient(circle at 50% 60%, rgba(90,0,255,0.25) 0%, transparent 45%),
-        linear-gradient(180deg, #02030b, #000000);*/
-    
-    
-    --injector-producer-table-bg: transparent;
-       --info-card-border: rgba(0,255,210,0.25);;
-}
-
-</style>
-<style>
-  :root {
+  :pppproot {
     --wf-bg: #f6f8fc;
     --wf-card-bg: #ffffff;
     --wf-border: #dfe5f1;
@@ -278,7 +64,7 @@ linear-gradient(
 
 
   
-.pane{
+.pppppane{
     background: var(--pane-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -291,7 +77,7 @@ linear-gradient(
  
 
 
-.card{
+.ppppcard{
     padding: 5px 10px;
     border-radius: 6px;
     background: var(--pane-bg);
@@ -317,7 +103,7 @@ linear-gradient(
     transition: all 0.2s ease;
 }
 
-.card:hover{
+.ppppcard:hover{
     transform: translateY(-2px)!important;
     box-shadow: 0 8px 22px rgba(0,0,0,0.35)!important;
     border-color: var(--hover-color) !important;
@@ -327,11 +113,17 @@ linear-gradient(
 
 charts-catalog-control {
   /*flex: 1 1 auto;*/
-  height: 90vh;/*%;*/
-  min-height: 70%;
+  height: 90%;
+ 
   display: block;
-  background-color: #00c6ff;
+ 
+ 
+  min-height: 0%;
+ 
+  /*background-color: #00c6ff;*/
 }
+
+ 
   .wf-page {
     /*height: 100vh;*/
     overflow: auto;
@@ -501,9 +293,9 @@ charts-catalog-control {
   .charts-catalog-card {
     flex: 0 0 auto;
     cursor: pointer;
-    border: 1px solid var(--wf-border);
+    /*border: 1px solid var(--hover-color);*/
     border-radius: 10px;
-    background: white;
+ 
     transition: 0.15s ease;
     padding: 10px;
   }
@@ -514,8 +306,9 @@ charts-catalog-control {
   }
 
   .charts-catalog-card.selected {
-    border: 2px solid var(--wf-blue);
-    background: var(--wf-blue-soft);
+    border: 2px solid var(--hover-color);
+    background-color: var(--primary-color);
+     
   }
 
   .charts-catalog-card-header {
@@ -610,20 +403,22 @@ charts-catalog-control {
 
   .charts-catalog-preview-label {
     display: inline-block;
-    border: 2px solid #12263f;
+    /*border: 2px solid #12263f;*/
     border-radius: 6px;
     padding: 5px 10px;
     font-size: 12px;
     font-weight: 900;
     margin-bottom: 8px;
-    background: white;
+    background: var(--primary-color)
   }
 
   .charts-catalog-preview-panel {
     /*flex: 1 1 auto;*/
-    height: 100%;
-    min-height: 50%;
-    background: var(--wf-red);
+    /*height: 100%;
+    min-height: 80%;*/
+    min-height: 400px;
+    height:100%;
+    background: red;
     color: white;
     border-radius: 10px;
     padding: 12px;
@@ -643,8 +438,8 @@ charts-catalog-control {
     height: 22px;
     padding: 0 7px;
     border-radius: 999px;
-    background: #e5eaf3;
-    color: var(--wf-muted);
+    background: var(--hover-color);
+    /*color: var(--wf-muted);*/
     font-size: 12px;
     margin-left: 8px;
   }
@@ -657,11 +452,11 @@ charts-catalog-control {
   }
 
   .charts-catalog-selected-item {
-    border: 1px solid var(--wf-border);
+    /*border: 1px solid var(--wf-border);*/
     border-radius: 10px;
     padding: 10px 12px;
     margin-bottom: 8px;
-    background: white;
+   
     font-weight: 700;
     font-size: 13px;
   }
@@ -692,42 +487,183 @@ charts-catalog-control {
     justify-content: center;
   }
 </style>
-</head>
+
 
 <body>
-  <div class="wf-page">
-    <div class="wf-header">
-      <div>
-        <div class="wf-brand">
-          <div class="wf-logo">W</div>
-          <div>
-            <div>Dashboard builder</div>
-            <div class="wf-subtitle">Waterflood Insights</div>
-          </div>
+ 
+    <div id='side-bar-top' class="h50">
+          
+        <script>
+        function showCard(cardId, btn) {
+
+            let ids = ['data-selection-card', 'studies-selector-card', 'views-selector-card'];
+            for( let id of ids ){
+                document.getElementById(id).style.display = 'none';
+            }
+            let btns = ['data-tab1','studies-tab1', 'views-tab1']
+            for( let id of btns ){
+                document.getElementById(id).classList.remove('selected');
+                document.getElementById(id).classList.remove('active');
+            }
+            document.getElementById(cardId).style.display = 'block';
+            btn.classList.add('selected');
+            btn.classList.add('active');
+        
+        }
+        </script>
+        <button id='data-tab1' class="btn btn-sm" onclick="showCard('data-selection-card',this)">Historical data</button>
+        <button id='studies-tab1' class="btn btn-sm" onclick="showCard('studies-selector-card',this)">Studies</button>
+        <button id='views-tab1' class="btn btn-sm" onclick="showCard('views-selector-card',this)">Views</button>
+        <p></p>
+        <!--button class="btn btn-sm" onclick="showCard('workflows-selector-card',this)">Workflows</button-->
+
+
+        <div class="card" id="data-selection-card">
+            <div>
+                <label id='project_name' class="subtitle">Project name</label>
+                <hr>
+
+                <p class="subtitle">Reservoir management unit</p>
+                <combobox-component id="reservoir-unit-selector"></combobox-component>
+            </div>
+            <div>
+   
+                <details><summary class="subtitle mt-2">Sectors</summary>
+                <two-column-checkbox-list id="sector-selector"></two-column-checkbox-list>
+               </details>
+            </div>
+            <div>
+                <p class="subtitle">Time frame</p>
+
+                <div class="d-flex align-items-center mb-3">
+                    <label for="start-date"  >Start:</label>
+                    <input type="date" id="start-date" name="start-date" class="form-control form-control-sm mb-2">
+    
+                  </div>
+
+                  <div class="d-flex align-items-center mb-3">
+
+                <label for="end-date" >End: </label>
+                <input type="date" id="end-date" name="end-date" class="form-control form-control-sm">
+            </div>
+ 
+                <p></p>
+                Displace time frame and load data 
+                <div class="d-flex align-items-center gap-2">
+                    
+                    <button class="btn btn-sm btn-primary" id="time-frame-player-left-button">
+                        <i class="fa fa-caret-left"></i>
+                    </button>
+                    <input type="number" id="range-value" name="range-value" class="form-control form-control-sm" min="1" max="180" value="1" style="width: 80px;">
+                    <button class="btn btn-sm btn-primary" id="time-frame-player-right-button">
+                        <i class="fa fa-caret-right"></i>
+                    </button>
+                </div>
+        
+            </div>
+            <hr>
+            <div style="display:flex; gap:10px">
+            <button id='apply-data-selection-button' class="btn btn-primary">Apply</button>   
+            <button class="well-selection-indicator"><span>&#9888;Well selection active</span></button>
+            </div>
+            
         </div>
-      </div>
 
-      <button id="fetch-catalog" class="btn btn-primary">
-        Fetch Catalog
-      </button>
+        <div class="card" id="studies-selector-card">
+            <stringlist-component  
+            checkboxes=true 
+            selection_mode='single' 
+            id='study-selector'>
+        </stringlist-component>
+            <button id='study-selector-button' class="btn btn-primary">Results</button>
+         <button id='study-load-parameters-button' class="btn btn-success">Parameters</button>
+          <button id='study-delete-button' class="btn btn-warning">Delete selected</button>
+            
+                      </div> 
+     
+        <div class="hidden card" id="views-selector-card">
+            <!--h5>Map background</h5>
+            <span> <input style='margin-right:10px;' type="radio" id="satellite-button" name="display-option" value="text"> Satellite </span></br>
+            <span> <input style='margin-right:10px;' type="radio" id="basic-button" name="display-option" value="text"> Basic(default)</span></br>
+            <span> <input style='margin-right:10px;' type="radio" id="street-button" name="display-option" value="text"> Street maps </span></br>
+            -->
+            </div>
+          
+
     </div>
 
-    <charts-catalog-control id="charts-catalog"></charts-catalog-control>
-
-    <div class="wf-assistant-placeholder">
-      Assistant placeholder: chart, chatbox, recommendations, or explanations will go here.
+    <div id='side-bar-bottom'>
+        
+        <p class="subtitle mt-2">Workflows</p>
+        <div class="card" id="workflows-selector-card">
+            <stringlist-component id='workflow-selector' checkboxes=true 
+            notitle='Workflows' selection_mode='single'> 
+            </stringlist-component>
+        </div>  
     </div>
 
-    <!--pre id="selected-plots-output" style="display:none;"></pre-->
-  </div>
+    <tabs-component id="middle-tabs"></tabs-component>
 
 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-0">
+    <div class="w-100 d-flex flex-row align-items-center">
+
+        <button id="fetch-catalog-button">Fetch catalog</button>
+
+        <button id="test">Memory  check</button>
+
+        <!-- Left Column (1/3 width) -->
+        <div style="flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: white;">
+            <button class="btn" id="projects-list-button" style="color: white;">Hide/show projets</button>
+            <button class="warning-button well-selection-indicator">
+                <span class="warning-icon">⚠Well selection active</span>
+            </button>
+        </div>
+
+        <!-- Middle Column (1/3 width) -->
+        <div class="mx-2" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+            <a class="navbar-brand" href="#">Waterflood modeller</a>
+        </div>
+
+        <!-- Right Column (1/3 width) - Reordered and Right-Justified -->
+        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 14px; color: white;">
+            
+            <select class='form-select form-select-sm' id="CoordinateReferenceSelector" style="max-width: 120px;">
+                <option selected value="Kuwait (38)">Kuwait</option>
+                <option value="Mexico (13)">Mexico</option>
+            </select>
+        
+            <select class='form-select form-select-sm' id="themeSelector" onchange="selectTheme(this.value)" style="max-width: 130px;">
+                <!--option value="light">Simple white</option>
+                <option value="dark">Simple dark</option>
+                <option value="neon-dark">Neon Dark</option>
+                <option value="neon-light">Neon Light </option>
+                <option value="blue-light">Blue</option-->
+            </select>
+        
 
 
+            <!-- Project Name Container positioned at the absolute right with clear margins -->
+            <div id='current-project-name' 
+                 style="font-weight: bold; display: flex; align-items: center; color: white; margin-left: 15px; margin-right: 15px; white-space: nowrap;">
+                   
+            </div> 
+        </div>   
+    </div>
+</nav>
+ 
+<div id='all-app-wrapper' style="position: relative;top: 47px;" 
+class="container-fluid">
 
+  <new-three-column-main-layout 
+  id = "main-layout">
+</new-three-column-main-layout>
 
+<charts-catalog-control style="min-height:400px" id="charts-catalog"></charts-catalog-control>
+ </div>
 
 <script>
+
 
 class ChartsCatalogControl extends HTMLElement {
   
@@ -750,7 +686,7 @@ class ChartsCatalogControl extends HTMLElement {
     this.innerHTML = `
       <div class="wf-main-grid">
 
-        <section class="pane xxwf-panel">
+        <section class="pane">
           <div class="wf-panel-header">Plot catalog</div>
 
           <div class="wf-panel-body charts-catalog-catalog-area">
@@ -786,7 +722,7 @@ class ChartsCatalogControl extends HTMLElement {
           </div>
         </section>
 
-        <section class="pane xxwf-panel">
+        <section class="pane ">
           <div class="wf-panel-header">Description + parameters</div>
 
           <div class="wf-panel-body charts-catalog-middle-body">
@@ -1159,6 +1095,7 @@ class ChartsCatalogControl extends HTMLElement {
       this.editedParametersByFunction[plot.function] ||
       this.buildDataFromParameters(parameters);
 
+    JSONEditor.defaults.options.object_background = "transparent";
     this.editor = new JSONEditor(container, {
       schema: schema,
       startval: data,
@@ -1296,40 +1233,86 @@ class ChartsCatalogControl extends HTMLElement {
 customElements.define("charts-catalog-control", ChartsCatalogControl);
 
 
-document.getElementById("fetch-catalog").addEventListener("click", async () => {
-  const response = await fetch("/fetch_known_plots_catalog");
-  const catalog = await response.json();
-
-  document
-    .getElementById("charts-catalog")
-    .setCatalog(catalog);
-});
 
 
-</script>
+function selectTheme(themeName) {
+    if (!GlobalState.themes.includes(themeName)) {
+        console.warn(`Theme "${themeName}" is not a recognized option.`);
+    }
+
+    // Apply attribute to root element
+    document.documentElement.setAttribute("data-theme", themeName);
+    
+    // Synchronize state tracking object
+    GlobalState.currentTheme = themeName;
+    
+    // Legacy support fallback compatibility check
+    if (typeof currentTheme !== "undefined") {
+        currentTheme = themeName;
+    }
+    
+    // Execute Plotly external framework rendering updates
+    if (typeof applyPlotlyTheme === "function") {
+        const isDark = themeName.includes("dark");
+        applyPlotlyTheme(document, isDark);
+    }
+    
+    console.log("Global State Theme set to:", GlobalState.currentTheme);
+};
 
 
-<script>
-//document.documentElement.dataset.theme = "dark";
+selectTheme("dark")
+
+document.addEventListener("DOMContentLoaded", function() {
+
+       //debugger;
+    
+        let layout = document.getElementById('main-layout');
+        layout.set('left-top',Id('side-bar-top'));
+        layout.set('left-bottom',Id('side-bar-bottom'));
+        const workflows = [
+            '💧 Liquid history match', 
+            '🤖 Dynamic dashboards',   
+            '⚖️ Static pattern flow balancing',
+            '🧬 Genetic optimization'
+        ]
+        document.getElementById('workflow-selector').set_data(workflows);
 
 
-document.getElementById("charts-catalog")
-  .addEventListener("generate-dashboard-plots", async (event) => {
-    const selectedPlots = event.detail.selectedPlots;
+        init_theme_selector(); 
+ 
+         initMapContainer();
 
-    const response = await fetch("/generate_dashboard_plots", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(selectedPlots)
+         let catalog = Id("charts-catalog");
+         //layout.set('right-top',catalog);
+         layout.set('right-top', catalog);
+
+
+         Id("workflow-selector").addEventListener("clicked",(evt)=>{
+            alert("dgdfg");
+            console.log(evt.detail);
+         });
+
+
+    document.getElementById("fetch-catalog-button").addEventListener("click", async () => {
+    const response = await fetch("/fetch_known_plots_catalog");
+    console.log(' response is ', response )
+    
+    const catalog = await response.json();
+
+    console.log(' catalog is ', catalog )
+    document
+        .getElementById("charts-catalog")
+        .setCatalog(catalog);
     });
 
-    const result = await response.json();
 
-    console.log("Backend response:", result);
-  });
+
+
+    }); //on-load 
 
 </script>
+ 
+
 </body>
 </html>

@@ -36,8 +36,7 @@
 
 
 <script>
-document.documentElement.setAttribute("data-theme", "dark");
- 
+
 /**
  * Extract and display ANY server-side error using SweetAlert2
  * @param {Response} response - The fetch Response object
@@ -144,23 +143,29 @@ async function processChatAnalystResponse( genai_response_json ){
 
 }
 
-
-
-
 /**
  * Part 1: Handles the network payload, POST execution, and server errors.
  * @param {HTMLElement} buttonElement - The button triggering the click event.
  * @returns {Promise<Object|null>} Clean parsed JSON data object or null if failed.
  */
 async function sendCatalogPreviewRequest() {
-    console.log("[sendCatalogPreviewRequest] Dispatching request payload");
+    console.log("[--sendCatalogPreviewRequest] Dispatching request payload");
 
     // Extract optional identifier attributes if present on the clicked button node
     //const chartId = buttonElement?.getAttribute("data-id") || null;
 
+    let charts  = document.querySelector('#charts-catalog');
+
+    let selectedPlot = charts.selectedPlot;
+    console.log( 'selectedPlot', selectedPlot.display_name );
+    console.log( 'selectedPlot', selectedPlot );
+    
+
     let payload = {
         chart_id: 'chartId',
-        request_type: "preview"
+        request_type: "preview",
+        chart_display_name: selectedPlot.display_name,
+        parameters : selectedPlot.parameters || undefined 
     };
 
     try {
@@ -273,6 +278,8 @@ function relayout( container){
 
 function initialize(){
     
+    document.documentElement.setAttribute("data-theme", "neon-dark");
+ 
     let layout = document.getElementById('main-layout');
     let tabs = document.getElementById("tabs");
 
@@ -287,11 +294,17 @@ function initialize(){
     const chartIcon = Object.assign(document.createElement("i"), {className: "fa-solid fa-globe"});
 
     let catalog = document.getElementById("charts-catalog")
-    tabs.addTabWithContent("Home", catalog,chartIcon);
-    tabs.disableClose("Home", true);
+    layout.set( 'right', catalog );
+    //tabs.addTabWithContent("Home", catalog,chartIcon);
+    //tabs.disableClose("Home", true);
+
 
     document.querySelector(".layout-hide-left-button").click();
     document.querySelector("#fetch-catalog").click();
+
+
+
+
 
 
 const data = [
@@ -383,6 +396,34 @@ function initializeChatAnalyst(){
         await processChatAnalystResponse( genai_response_json )
 
     });
+
+
+        const analystOutput = document.createElement("div");
+        catalog.displayGenAiOutput( analystOutput );
+
+        analystOutput.id = "analyst-output";
+        analystOutput.style.background = "red";
+        analystOutput.style.height = "100%";
+        analystOutput.style.min_height = "100%";
+        
+        analystOutput.style.overflowY = "auto";
+        analystOutput.innerHTML = `
+        <h2>Analyst Output</h2>
+        <p>If you can see this text, the container is being rendered correctly.</p>
+        <p>Additional content goes here...</p>
+        `;
+
+        document.querySelector(".wf-chatbox-history").classList.add("hidden")
+
+    //let ele = document.querySelector(".wf-chatbox-history");
+
+    //if (ele) {catalog.displayGenAiOutput( ele );
+    //    ele.style.width = "90%";
+    //    ele.style.maxHeight = "90%";
+    //    ele.style.overflowY = "auto";
+    //    }
+
+    
 
 }
 

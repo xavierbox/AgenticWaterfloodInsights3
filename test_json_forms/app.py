@@ -30,7 +30,7 @@ class DummyConfig(BaseModel):
 
 #from VisualizationSystem.visualization_backend.plot_models_catalog import generate_plots
 #from VisualizationSystem.visualization_backend.plot_models_catalog import generate_plots
-from plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
+from  plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
  
 
 crm_dataset = "I am the crm dataset"

@@ -6,11 +6,11 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 
-from VisualizationSystem.visualization_backend.plotting.plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
-from VisualizationSystem.visualization_backend.global_constants import *  
-from VisualizationSystem.visualization_backend.global_models import UIState
+from visualization_backend.plotting.plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
+from visualization_backend.global_constants import *  
+from visualization_backend.global_models import UIState
 
-from VisualizationSystem.temporal_and_aux import * 
+from temporal_and_aux import * 
 
 
 app = Flask(__name__)

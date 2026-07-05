@@ -830,6 +830,20 @@ class ChartsCatalogControl extends HTMLElement {
     const list = this.querySelector('[data-role="charts-catalog-list"]');
     const genai = this.querySelector('[data-role="charts-catalog-genai-panel"]');
     const workspace = this.querySelector('[data-role="charts-catalog-workspace"]');
+    const genaiOutput = this.querySelector('[data-role="charts-catalog-genai-output"]');
+
+    const isGenAi = mode === "genai";
+
+    list.classList.toggle("hidden", isGenAi);
+    genai.classList.toggle("hidden", !isGenAi);
+    workspace.classList.toggle("hidden", isGenAi);
+    genaiOutput.classList.toggle("hidden", !isGenAi);
+    }
+
+    old_setCatalogViewMode(mode) {
+    const list = this.querySelector('[data-role="charts-catalog-list"]');
+    const genai = this.querySelector('[data-role="charts-catalog-genai-panel"]');
+    const workspace = this.querySelector('[data-role="charts-catalog-workspace"]');
 
     const isGenAi = mode === "genai";
 
@@ -872,18 +886,20 @@ class ChartsCatalogControl extends HTMLElement {
             
 
             <div class="wf-panel-body charts-catalog-middle-body">
+
+            <div
+                data-role="charts-catalog-genai-output"
+                class="charts-catalog-genai-output hidden"
+            >
+                Agent output placeholder...
+            </div>
+
+
+
             <div
                 data-role="charts-catalog-workspace"
                 class="charts-catalog-workspace"
             >
-                <!--div
-                data-role="charts-catalog-description"
-                class="charts-catalog-description-box"
-                >
-                Select a plot to see its description and parameters.
-                </div-->
-
-    
 
                 <div
                 data-role="charts-catalog-parameter-editor"
@@ -962,45 +978,60 @@ class ChartsCatalogControl extends HTMLElement {
     }
 
 
-displayPreview(element) {
-  const previewContainer = this.querySelector(
-    '[data-role="charts-catalog-preview"]'
-  );
+    displayPreview(element) {
+    const previewContainer = this.querySelector(
+        '[data-role="charts-catalog-preview"]'
+    );
 
-  previewContainer.replaceChildren();
+    previewContainer.replaceChildren();
 
-  if (element) {
-    previewContainer.appendChild(element);
+    if (element) {
+        previewContainer.appendChild(element);
 
-    requestAnimationFrame(() => {
-      if (window.Plotly) {
-        element
-          .querySelectorAll?.(".js-plotly-plot")
-          ?.forEach(plot => Plotly.Plots.resize(plot));
-      }
-    });
-  }
-}
+        requestAnimationFrame(() => {
+        if (window.Plotly) {
+            element
+            .querySelectorAll?.(".js-plotly-plot")
+            ?.forEach(plot => Plotly.Plots.resize(plot));
+        }
+        });
+    }
+    }
 
-attachGenAiChatDialog(chatElement) {
-  const container = this.querySelector(
-    '[data-role="charts-catalog-genai-panel"]'
-  );
+    attachGenAiChatDialog(chatElement) {
+    const container = this.querySelector(
+        '[data-role="charts-catalog-genai-panel"]'
+    );
 
-  if (!chatElement || !container) {
-    console.warn("Could not attach GenAI chat dialog", {
-      chatElement,
-      container
-    });
-    return;
-  }
+    if (!chatElement || !container) {
+        console.warn("Could not attach GenAI chat dialog", {
+        chatElement,
+        container
+        });
+        return;
+    }
 
-  chatElement.style.display = "";
-  container.innerHTML = "";
-  container.appendChild(chatElement);
-}
+    chatElement.style.display = "";
+    container.innerHTML = "";
+    container.appendChild(chatElement);
+    }
 
- 
+    displayGenAiOutput(element) {
+    const container = this.querySelector(
+        '[data-role="charts-catalog-genai-output"]'
+    );
+
+    if (!container) {
+        console.warn("GenAI output container not found");
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (element) {
+        container.appendChild(element);
+    }
+    }
 
   bindButtons() {
     this.applyButton = this.querySelector(

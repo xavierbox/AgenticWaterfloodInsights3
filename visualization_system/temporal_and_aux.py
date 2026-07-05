@@ -22,11 +22,11 @@ def get_dummy_plotly_figure():
                 "mode": "lines+markers", 
                 "name": "Oil Production",
                 "line": {
-                    "color": "#001f9c",  
+                    #"color": "#1f9c00",  
                     "width": 3
                 },
                 "marker": {
-                    "color": "#cfe0ff",
+                    #"color": "#17233b",
                     "size": 8
                 }
             }

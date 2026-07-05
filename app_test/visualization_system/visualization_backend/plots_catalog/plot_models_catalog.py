@@ -4,9 +4,9 @@ from typing import Dict, List, Literal, Optional, Union, Any
 import pprint 
 from pydantic import BaseModel, Field
 
-from global_constants import CRMDATASET
+from  app_test.visualization_system.visualization_backend.plots_catalog.global_constants import CRMDATASET
 import inspect
-import  plot_functions as plot_functions 
+import  app_test.visualization_system.visualization_backend.plots_catalog.plot_functions as plot_functions 
 
 
 class PlotStringParameter(BaseModel):

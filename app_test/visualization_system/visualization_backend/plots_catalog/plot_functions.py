@@ -1,7 +1,7 @@
 from typing import Dict, List, Literal, Optional, Union, Any
 import pprint 
 from pydantic import BaseModel, Field
-from global_constants import CRMDATASET
+from app_test.visualization_system.visualization_backend.plots_catalog.global_constants import CRMDATASET
 
 
 def plot_wor_vs_cumulative_oil(crm_dataset: Any, split_by_well: bool = True, split_by_sector: bool = False):

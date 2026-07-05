@@ -3,8 +3,8 @@ from typing import Dict, List, Literal, Optional, Union, Any
 import pprint, inspect
 from pydantic import BaseModel, Field
 
-from   VisualizationSystem.visualization_backend.global_constants import CRMDATASET
-import VisualizationSystem.visualization_backend.plotting.plot_functions as plot_functions 
+from   visualization_backend.global_constants import CRMDATASET
+import visualization_backend.plotting.plot_functions as plot_functions 
 
 
 class PlotStringParameter(BaseModel):

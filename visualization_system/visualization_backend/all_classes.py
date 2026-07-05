@@ -3,6 +3,7 @@ import sys, pprint, pandas as pd
 sys.path.append('../../')
 sys.path.append('../')
 sys.path.append('./')
+import warnings
 
 from typing import Any, Dict, List, Iterable, Literal, Union, Optional,TypedDict
 from typing_extensions import Self
@@ -27,6 +28,11 @@ from visualization_system.visualization_backend.analyst.prompts import planner_p
 from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
 from visualization_system.visualization_backend.analyst.prompts import chart_agent_prompt
 
+ 
+import pandas as pd, re, json  
+from langchain_core.messages import SystemMessage, HumanMessage
+
+  
 
 @dataclass 
 class DirectAnswerConfig:
@@ -76,11 +82,9 @@ class TaskResult(BaseModel):
         ),
     )
 
-
 class TextResult(BaseModel):
     text: str
     role: str = "answer"
-
 
 class DirectAnswerComponent:
     agent_name = "direct_answer"
@@ -645,194 +649,8 @@ class ChartRequest(BaseModel):
 
     facts_context: str = ""
 
-class xxTableGeneratorComponent:
-    """
-    Converts a DataFrameResult into a UI table item.
-    """
-
-    def run(self, dataframe_result: DataFrameResult) -> UIItem:
-        df = dataframe_result.dataframe
-
-        columns = [
-            {
-                "header": str(col),
-                "field": str(col),
-            }
-            for col in df.columns
-        ]
-
-        rows = df.to_dict(orient="records")
-
-        return UIItem(
-            id=f"table_{dataframe_result.table_name}_{uuid4().hex[:8]}",
-            type="table",
-            title=dataframe_result.table_name,
-            data={
-                "columns": columns,
-                "rows": rows,
-            },
-            meta={
-                "description": dataframe_result.description,
-                "sortable": True,
-                "shape": {
-                    "rows": int(df.shape[0]),
-                    "columns": int(df.shape[1]),
-                },
-            },
-        )
-
-class old_ChartGeneratorComponent:
-    """
-    Creates chart UI items from chart requests.
-
-    For now this returns a dummy Plotly chart item. Later this component can use
-    rules, tools, or an LLM to generate an appropriate Plotly figure.
-    """
-
-    def __init__(self, llm: Any):
-        self.llm = llm
-
-    def run(self, request: ChartRequest) -> UIItem:
-        df = request.dataframe
-
-        if df is None or not hasattr(df, "shape") or df.empty:
-            return UIItem(
-                id=f"chart_error_{uuid4().hex[:8]}",
-                type="error",
-                title=f"Could not chart {request.table_name}",
-                data={
-                    "message": "Cannot produce chart for empty or invalid dataframe.",
-                    "details": request.table_description or "",
-                },
-                meta={
-                    "source_table": request.table_name,
-                },
-            )
-
-        return UIItem(
-            id=f"chart_{request.table_name}_{uuid4().hex[:8]}",
-            type="chart",
-            title=request.table_name,
-            data={
-                "engine": "plotly",
-                "plotly": {
-                    "data": [],
-                    "layout": {
-                        "title": {
-                            "text": request.table_description or request.table_name
-                        },
-                        "margin": {
-                            "t": 40,
-                            "r": 40,
-                            "b": 60,
-                            "l": 60,
-                        },
-                    },
-                },
-            },
-            meta={
-                "source_table": request.table_name,
-                "description": request.table_description,
-                "user_query": request.user_query,
-                "user_intent": request.user_intent,
-                "dummy": True,
-            },
-        )
-
-class old_PresenterComponent:
-    """
-    Converts the completed ExecutorState into UI display items.
-
-    This component decides whether each result should become text, table, chart,
-    question, or error. It delegates table serialization to TableGeneratorComponent
-    and chart generation to ChartGeneratorComponent.
-    """
-
-    def __init__(self, llm: Any):
-        self.llm = llm
-
-    def run(self, result_state: ExecutorState) -> PresenterResponse:
-
-        def _make_clarification_item(clarification_request: str) -> UIItem:
-            return UIItem(
-                id=f"question_{uuid4().hex[:8]}",
-                type="question",
-                title="Additional information required",
-                data={"question": clarification_request},
-            )
-
-        def _make_text_item(data_result: TextResult) -> UIItem:
-            return UIItem(
-                id=f"text_{uuid4().hex[:8]}",
-                type="text",
-                title=None,
-                data={"text": data_result.text},
-            )
-
-        def _make_error_item(
-            task_result: TaskResult,
-            data_result: object | None = None,
-        ) -> UIItem:
-            return UIItem(
-                id=f"error_{uuid4().hex[:8]}",
-                type="error",
-                title="Presentation error",
-                data={
-                    "message": f"No presenter for result from {task_result.agent}",
-                    "details": (
-                        str(type(data_result))
-                        if data_result is not None
-                        else task_result.instruction
-                    ),
-                },
-            )
-
-        ui_items: list[UIItem] = []
-
-        clarification_request = result_state.get("clarification_request")
-        if clarification_request:
-            ui_items.append(_make_clarification_item(clarification_request))
-            return PresenterResponse(items=ui_items)
-
-        for task_result in result_state.get("task_results", []):
-            for data_result in task_result.data_results:
-
-                if isinstance(data_result, TextResult):
-                    ui_items.append(_make_text_item(data_result))
-
-                #Note: when the analyst returns 2+ tables, we still use the same code 
-                # as the dataresults are just added to the list 
-                elif isinstance(data_result, DataFrameResult):
-                    print("processing dataframe result")
-                    # later:
-                    # ui_items.append(table_or_chart_item)
-
-                else:
-                    ui_items.append(_make_error_item(task_result, data_result))
-
-        return PresenterResponse(items=ui_items)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from typing import Any
-import pandas as pd, re, json  
-from langchain_core.messages import SystemMessage, HumanMessage
-
  
-
-
-
+ 
 def format_label(name: str) -> str:
     """
     Convert column-like names to display labels.
@@ -847,6 +665,7 @@ def format_label(name: str) -> str:
 
     text = str(name).replace("_", " ").strip().lower()
     return text[:1].upper() + text[1:]
+
 def _as_list(value):
     if value is None:
         return []
@@ -944,6 +763,10 @@ def _filter_args(
             "title",
             "template",
         },
+        "plot_list": {
+                    "columns", "title",
+                },
+
     }
 
     if tool not in allowed_args:
@@ -956,7 +779,6 @@ def _filter_args(
     }
 
 ALLOWED_AGGS = {"sum", "mean", "median", "min", "max", "count", "nunique"}
-
 
 def _aggregate(
     df: pd.DataFrame,
@@ -974,7 +796,6 @@ def _aggregate(
         df.groupby(group_by, dropna=False, as_index=False)[value_cols]
         .agg(aggregate)
     )
-
 
 def _bucket_date(
     df: pd.DataFrame,
@@ -1063,7 +884,6 @@ def preprocess_for_chart(
             raise ValueError("bucket must be one of: D, W, M, Q, Y")
 
     return out
-
 
 def plot_bar_chart(
     df: pd.DataFrame,
@@ -1519,11 +1339,18 @@ class TableResponseProcessor:
 
         for col in df.columns:
             series = df[col]
+
+            print("In the processor ", col )
+
             # Handle duplicate column names gracefully
             if isinstance(series, pd.DataFrame):
                 series = series.iloc[:, 0]
 
+
+            print("-----------here")
             summary = self.infer_column_summary(series)
+            print("Summary done ")
+
             lines.append(f"- Column: {col}")
 
             for key in preferred_order:
@@ -1536,22 +1363,50 @@ class TableResponseProcessor:
 
         return "\n".join(lines)
 
+    def _safe_parse_datetime_candidate(self, s: pd.Series) -> pd.Series:
+        values = s.dropna()
+
+        if values.empty:
+            return pd.Series(dtype="datetime64[ns]")
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="Could not infer format.*",
+                category=UserWarning,
+            )
+            return pd.to_datetime(values, errors="coerce")
+
     def infer_column_role(self, s: pd.Series) -> str:
         """Infer a chart-oriented semantic role."""
+        
+        print("inferring role for ", s.name )
         if pd.api.types.is_datetime64_any_dtype(s):
+            print('is_datetime64_any_dtype')
             return "temporal"
 
         if pd.api.types.is_bool_dtype(s):
+            print('is_bool_dtype')
             return "categorical"
 
         if pd.api.types.is_numeric_dtype(s):
+            print('is_numeric_dtype')
             nunique = s.nunique(dropna=True)
             if nunique <= self.categorical_numeric_threshold:
                 return "categorical_numeric"
             return "quantitative"
 
         if pd.api.types.is_string_dtype(s) or pd.api.types.is_object_dtype(s):
-            parsed = pd.to_datetime(s.dropna(), errors="coerce")
+            print('is_string_dtype')
+
+            
+            print("This is just before the warning error")
+            #parsed = pd.to_datetime(s.dropna(), errors="coerce")
+            parsed = self._safe_parse_datetime_candidate(s)
+            print("This is just after the warning error")
+            
+
+
             valid_ratio = parsed.notna().mean() if len(parsed) else 0.0
             if valid_ratio >= 0.9:
                 return "temporal"
@@ -1570,7 +1425,12 @@ class TableResponseProcessor:
         unique_count = non_null.nunique(dropna=True)
         unique_ratio = unique_count / row_count if row_count else 0.0
 
+        print("isnide infer_column_summary, caling role")
+
+
         role = self.infer_column_role(s)
+        print("Role found", role )
+
 
         summary: dict[str, Any] = {
             "dtype": str(s.dtype),
@@ -1620,6 +1480,8 @@ class TableResponseProcessor:
                 #        if not mode_diff.empty:
                 #            summary["common_interval"] = str(mode_diff.iloc[0])
 
+
+        print("Retuning summary")
         return summary
 
     def classify_cardinality(self, unique_count: int) -> str:
@@ -1645,8 +1507,6 @@ class PresenterComponent2:
     def __init__(self, llm: Any, config: PresenterConfig | None = None ):
         self.llm = llm
         self.config = config or PresenterConfig()
-
-
 
     def run(self, result_state: ExecutorState) -> PresenterResponse:
 
@@ -1702,7 +1562,7 @@ class PresenterComponent2:
                 elif isinstance(data_result, DataFrameResult):
                     print("processing dataframe result")
 
-                    table_text_or_chart_item = self.process_dataframe(data_result,task_result.instruction)
+                    table_text_or_chart_item = self._process_dataframe(data_result,task_result.instruction)
                     # later:
                     if table_text_or_chart_item:
                         ui_items.append(table_text_or_chart_item)
@@ -1712,7 +1572,6 @@ class PresenterComponent2:
 
         return PresenterResponse(items=ui_items)
     
-
     def _present_very_small_table(self, df, data_result,instruction):
     
         data_string = df.to_json() #@  ", ".join([f"{col}: {df.iloc[0][col]}" for col in df.columns])
@@ -1765,7 +1624,6 @@ class PresenterComponent2:
             },
         )
 
-
     def _run_chart_plan(
             self, 
         plan: dict,
@@ -1793,13 +1651,9 @@ class PresenterComponent2:
 
 
         work = df.copy()
-
         preprocess = plan.get("preprocess")
         plot = plan.get("plot")
 
-        print("preprocess", preprocess)
-        print("plot", plot)
-        
 
         if preprocess:
             tool = preprocess.get("tool")
@@ -1812,7 +1666,6 @@ class PresenterComponent2:
             work = preprocess_for_chart(work, **args)
 
         if not plot:
-            print("Returing none")
             return None
 
         tool = plot.get("tool")
@@ -1834,13 +1687,11 @@ class PresenterComponent2:
         print("The final tool is", tool )
         return plotting_tools[tool](df=work, **args)
 
-
-    def process_dataframe( self,data_result,instruction ):
+    def _process_dataframe( self,data_result,instruction ):
 
 
         df = data_result.dataframe
         nrows, ncols = df.shape     
-        print(df.shape)
         print('instruction', instruction)
 
         #inst="""show the count of wells split by type, and the yearly cumulative liquid production since the year 2015."""
@@ -1851,9 +1702,13 @@ class PresenterComponent2:
         
         else:
             p = TableResponseProcessor()# self.llm )
+
+            print("Extracting context")
             table_context = p.extract_table_context( data_result )
-            chart_plan = self.select_chart_plan( data_result, table_context )
-            
+            print("selecting a plan")
+            #chart_plan = self._select_chart_plan( data_result, table_context )
+            chart_plan = self._select_chart_plan( instruction, table_context )
+
             print(100*'=')
             print(chart_plan)
             print(100*'=')
@@ -1861,14 +1716,14 @@ class PresenterComponent2:
             
             chart_output = self._run_chart_plan( chart_plan, df )
 
-
-            print("Type", type(chart_output) )
+            #later 
+            #if chart_output["data"]["type"] == "table":
+            #    format as a table.
+            #    pass 
 
             return self._make_chart_item( format_label(data_result.table_name), 
                                           chart_output,  # type: ignore
                                           data_result.description )
-
-
 
     def _strip_markdown_json(self,text: str) -> str:
         """
@@ -1890,7 +1745,7 @@ class PresenterComponent2:
 
         return text.strip()
 
-    def select_chart_plan(self,
+    def _select_chart_plan(self,
         
         user_query: str,
         table_context: str,
@@ -1909,8 +1764,8 @@ class PresenterComponent2:
 
         response = self.llm.invoke(messages)
         text = self._strip_markdown_json(response.content)
-        return json.loads(text)
-
+        r= json.loads(text)
+        return r 
 
 
 
