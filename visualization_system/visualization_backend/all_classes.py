@@ -35,7 +35,8 @@ from visualization_system.visualization_backend.analyst.prompts import split_sub
 
 import pandas as pd, re, json  
 from langchain_core.messages import SystemMessage, HumanMessage
-
+from visualization_system.visualization_backend.global_models import UIState
+ 
   
 
 @dataclass 
@@ -493,6 +494,8 @@ class AgenticSystem:
 
         self.graph = StateGraph(ExecutorState)
         self.app = None
+        self.last_query =  UIState( project_name="NoSet", query="Nothing") # type: ignore
+
 
     def create_graph(self):
         graph = self.graph
@@ -896,7 +899,7 @@ class xxPresenterChartingTools:
             "plot_line_chart": self.plot_line_chart,
             "plot_pie_chart": self.plot_pie_chart,
             "plot_scatter_chart": self.plot_scatter_chart,
-            "plot_list": self.plot_list,
+            "plot_table": self.plot_table,
         }
 
         if tool_name not in plotting_tools:
@@ -2003,7 +2006,7 @@ class PresenterChartingTools:
             "plot_line_chart": self.plot_line_chart,
             "plot_pie_chart": self.plot_pie_chart,
             "plot_scatter_chart": self.plot_scatter_chart,
-            "plot_list": self.plot_list,
+            "plot_table": self.plot_table,
         }
 
         if tool_name not in plotting_tools:
@@ -2105,11 +2108,7 @@ class PresenterChartingTools:
                 "text_by",
                 "title",
             },
-            "plot_list": {
-                "columns",
-                "sort_by",
-                "sort_order",
-                "limit",
+            "plot_table": {
                 "title",
             },
         }
@@ -2514,43 +2513,36 @@ class PresenterChartingTools:
         }
 
 
-
-    def plot_list(
+    def plot_table(
         self,
         df: pd.DataFrame,
-        columns: list[str] | str | None = None,
         *,
-        sort_by: str | None = None,
-        sort_order: str = "desc",
-        limit: int | None = None,
         title: str | None = None,
     ) -> dict:
-        work = df.copy()
-
-        if columns is not None:
-            columns = self._as_list(columns)
-            self._validate_columns(work, columns)
-            work = work[columns]
-
-        if sort_by is not None:
-            self._validate_columns(work, [sort_by])
-
-            ascending = sort_order.lower() == "asc"
-            work = work.sort_values(sort_by, ascending=ascending)
-
-        if limit is not None:
-            work = work.head(limit)
-
-        header_values = [self.format_label(c) for c in work.columns]
+        header_values = [
+            self.format_label(column)
+            for column in df.columns
+        ]
 
         cell_values = []
-        for col in work.columns:
-            s = work[col]
 
-            if pd.api.types.is_datetime64_any_dtype(s):
-                values = s.dt.strftime("%Y-%m-%d").fillna("").tolist()
+        for column in df.columns:
+            series = df[column]
+
+            if pd.api.types.is_datetime64_any_dtype(series):
+                values = (
+                    series
+                    .dt.strftime("%Y-%m-%d")
+                    .fillna("")
+                    .tolist()
+                )
             else:
-                values = s.fillna("").astype(str).tolist()
+                values = (
+                    series
+                    .fillna("")
+                    .astype(str)
+                    .tolist()
+                )
 
             cell_values.append(values)
 
@@ -2573,9 +2565,10 @@ class PresenterChartingTools:
                     "text": self.format_label(title) or "Table"
                 },
             },
-            "config": self.plotly_config
+            "config": self.plotly_config,
         }
-  
+
+
 class PresenterConfig:
 
     prompt :str = chart_agent_prompt
@@ -3223,6 +3216,25 @@ class PresenterComponent4:
             },
         )
 
+    def _make_table_item(
+        self,
+        figure_title: str,
+        plotly_json_figure: dict,
+        description: str | None = None,
+    ) -> UIItem:
+        return UIItem(
+            id=f"table_{uuid4().hex[:8]}",
+            type="table",
+            title=figure_title,
+            data={
+                "engine": "plotly",
+                "plotly": plotly_json_figure,
+            },
+            meta={
+                "description": description,
+            },
+        )
+
 
     def _run_chart_plan(
         self,
@@ -3273,6 +3285,8 @@ class PresenterComponent4:
         nrows, ncols = df.shape
 
         if nrows <= 2 and ncols <= 2:
+        #if nrows <= 5 and ncols <= 5:
+            
             return self._present_very_small_table(
                 df,
                 data_result,
@@ -3299,6 +3313,24 @@ class PresenterComponent4:
             chart_plan,
             df,
         )
+
+        plot = chart_plan.get("plot") or {}
+        tool_name = plot.get("tool")
+
+
+        if tool_name == "plot_table":
+            return self._make_table_item(
+                self._format_label(data_result.table_name),
+                chart_output,
+                data_result.description,
+            )
+
+        return self._make_chart_item(
+            self._format_label(data_result.table_name),
+            chart_output,
+            data_result.description,
+        )
+
 
         return self._make_chart_item(
             self._format_label(data_result.table_name),
