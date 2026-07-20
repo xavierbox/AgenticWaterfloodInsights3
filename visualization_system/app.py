@@ -2,6 +2,8 @@ from enum import Enum
 import pprint, random, os, sys, traceback    
 from flask import Flask, jsonify, render_template, request
 from pydantic import BaseModel, Field, ValidationError
+import pickle
+
 sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
@@ -225,7 +227,7 @@ def process_analyst_query():
         print("presenter ran",flush=True)
         '''
 
-        import pickle
+        
         #with open("ui_items.pkl", "wb") as file:
         #    pickle.dump(ui_items, file)
         with open("ui_items.pkl", "rb") as file:

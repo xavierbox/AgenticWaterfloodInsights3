@@ -16,15 +16,36 @@
   <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Include your custom JS components here -->
-    <script src="{{ url_for('static', filename='js/app_components.js') }}"></script>
-        <link rel="stylesheet" href="{{ url_for('static', filename='js/styles.css') }}">
+    
+<!-- Include your custom JS components here -->
+<script src="{{ url_for('static', filename='js/app_components.js') }}"></script>
 
+<script src="{{ url_for('static', filename='js/chatbox_component.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/styles.css') }}">
+
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/chat_box.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js/chat_history.css') }}">
+
+<style>
+
+.scrollable-page{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 90vh;
+    min-height: 0;
+    }
+
+</style>
 </head>
 
 <body>
 <button id="add-tab-button">Add tab</button>
 <button id="fetch-catalog" class="btn btn-primary">Fetch Catalog</button>
+
+<button id="chat-play" class="btn btn-primary">chat play</button>
 
 
  <new-three-column-main-layout id ='main-layout'></new-three-column-main-layout>
@@ -32,7 +53,7 @@
  
 <charts-catalog-control id="charts-catalog"></charts-catalog-control>
 
-<chat-dialog id="genai-chat-dialog" style="display:none;"></chat-dialog>
+<chat-dialog id="genai-chat-dialog"></chat-dialog>
 
 
 <script>
@@ -278,7 +299,7 @@ function relayout( container){
 
 function initialize(){
     
-    document.documentElement.setAttribute("data-theme", "neon-dark");
+    document.documentElement.setAttribute("data-theme", "dark");
  
     let layout = document.getElementById('main-layout');
     let tabs = document.getElementById("tabs");
@@ -396,9 +417,13 @@ function initializeChatAnalyst(){
         await processChatAnalystResponse( genai_response_json )
 
     });
+        let analystOutput = document.createElement("chat-history-component");
 
+        analystOutput.classList.add("scrollable-page");
 
-        const analystOutput = document.createElement("div");
+        catalog.displayGenAiOutput( analystOutput );
+
+        /*const analystOutput = document.createElement("div");
         catalog.displayGenAiOutput( analystOutput );
 
         analystOutput.id = "analyst-output";
@@ -411,9 +436,9 @@ function initializeChatAnalyst(){
         <h2>Analyst Output</h2>
         <p>If you can see this text, the container is being rendered correctly.</p>
         <p>Additional content goes here...</p>
-        `;
+        `;*/
 
-        document.querySelector(".wf-chatbox-history").classList.add("hidden")
+        //document.querySelector(".wf-chatbox-history").classList.add("hidden")
 
     //let ele = document.querySelector(".wf-chatbox-history");
 
@@ -491,6 +516,170 @@ window.addEventListener("DOMContentLoaded", () => {
 
 });
 
+
+document.getElementById("chat-play").addEventListener( "click", ()=>{
+       
+    const testData = [
+            {
+                data: {
+                    text: "Voidage Replacement Ratio (VRR) is a key reservoir management metric that measures the ratio of injected fluids to produced reservoir fluids.\n\nA VRR of 1.0 indicates that injected volume equals produced volume."
+                },
+                id: "text_8c22b186",
+                meta: {},
+                title: "Voidage replacement question",
+                type: "text"
+            },
+            {
+                data: {
+                    engine: "plotly",
+                    plotly: {
+                        config: {
+                            displaylogo: false,
+                            responsive: true
+                        },
+                        data: [
+                            {
+                                name: "Cumulative oil volume",
+                                orientation: "v",
+                                type: "bar",
+                                x: [
+                                    "P4",
+                                    "P3",
+                                    "P1",
+                                    "P2"
+                                ],
+                                y: [
+                                    12875.1990353,
+                                    12768.2343158,
+                                    12538.6220092,
+                                    11907.3297117
+                                ]
+                            }
+                        ],
+                        layout: {
+                            barmode: "group",
+                            title: {
+                                text: "Top producer wells by cumulative oil production"
+                            },
+                            xaxis: {
+                                title: {
+                                    text: "Name"
+                                }
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Cumulative oil volume"
+                                }
+                            }
+                        }
+                    }
+                },
+                id: "chart_eca6ac91",
+                meta: {},
+                title: "Top producer wells",
+                type: "chart"
+            },
+            {
+                data: {
+                    engine: "plotly",
+                    plotly: {
+                        config: {
+                            displaylogo: false,
+                            responsive: true
+                        },
+                        data: [
+                            {
+                                mode: "lines",
+                                name: "P1",
+                                type: "scatter",
+                                x: [
+                                    2018,
+                                    2019,
+                                    2020,
+                                    2021,
+                                    2022,
+                                    2023
+                                ],
+                                y: [
+                                    15878,
+                                    19913,
+                                    16711,
+                                    16507,
+                                    16982,
+                                    20411
+                                ]
+                            },
+                            {
+                                mode: "lines",
+                                name: "P2",
+                                type: "scatter",
+                                x: [
+                                    2018,
+                                    2019,
+                                    2020,
+                                    2021,
+                                    2022,
+                                    2023
+                                ],
+                                y: [
+                                    14370,
+                                    19009,
+                                    16625,
+                                    15571,
+                                    15925,
+                                    20393
+                                ]
+                            }
+                        ],
+                        layout: {
+                            title: {
+                                text: "Yearly liquid production"
+                            },
+                            xaxis: {
+                                title: {
+                                    text: "Year"
+                                }
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Liquid volume"
+                                }
+                            }
+                        }
+                    }
+                },
+                id: "chart_46b5e300",
+                meta: {},
+                title: "Yearly liquid production",
+                type: "chart"
+            }
+        ];
+
+    let chatHistoryComponent = document.getElementsByTagName("chat-history-component")[0];
+    
+    console.log( chatHistoryComponent );
+
+            const blockId = chatHistoryComponent.addTurn(
+                `User text for chat history block`
+            );
+
+            chatHistoryComponent.addContent(
+                testData,
+                
+            );
+
+    
+    /*console.log("here");
+    let chat = document.getElementById("genai-chat-dialog");
+
+    //chat.showBusy( true ); 
+    console.log("Appending user message")
+    chat.v1_appendUserMessage("User message")
+    */
+
+
+
+});
 
  
 

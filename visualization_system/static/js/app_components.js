@@ -1518,9 +1518,6 @@ chip.addEventListener("click", () => {
 
 
 }
-
-
-
 customElements.define("charts-catalog-control", ChartsCatalogControl);
 
 class QuickJS_ComboBoxSelector extends HTMLElement {
@@ -1680,7 +1677,10 @@ if (!customElements.get("two-column-checkbox-list")) {
 }
 
 
-class ChatDialog extends HTMLElement {
+
+
+
+class OLDChatDialog extends HTMLElement {
 
     constructor() {
         super();
@@ -2124,6 +2124,6 @@ connectedCallback() {
     }
 }
 
-customElements.define("chat-dialog", ChatDialog);
+customElements.define("old-chat-dialog", OLDChatDialog);
 
 
