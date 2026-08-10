@@ -16,7 +16,7 @@ from langchain.agents.structured_output import ToolStrategy
 
 
 from visualization_system.visualization_backend.global_models import UIState
-from visualization_system.visualization_backend.analyst.prompts import planner_prompt3 
+from visualization_system.visualization_backend.analyst.prompts import visualization_planner_prompt3 
 from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
 from visualization_system.visualization_backend.analyst.prompts import chart_agent_prompt 
 #
@@ -36,7 +36,7 @@ from visualization_system.visualization_backend.analyst.smart_data_tools  import
 #    prompt :str = planner_prompt3
 
 @dataclass 
-class DirectAnswerConfig:
+class xxDirectAnswerConfig:
     prompt :str =  ("Answer using stable general knowledge. "
                     "Be concise. Return reusable factual context."
                     "The user is a reservoir engineer")
@@ -107,7 +107,7 @@ class SQLAnalystTools:
   
 
 
-class AgenticSystem:
+class xxAgenticSystem:
 
     def __init__(self):
         self.planner_config: PlannerConfig = PlannerConfig()
@@ -195,7 +195,7 @@ class AgenticSystem:
         self.app = self.graph.compile()
         return self.app
 
-    def planner_node(self, state: ExecutorState):
+    def planner_node(self, state: VisualizationExecutorState):
 
         user_query = state["user_query"]
 
@@ -221,7 +221,7 @@ class AgenticSystem:
         }
 
 
-    def route_next_task(self, state: ExecutorState):
+    def route_next_task(self, state: VisualizationExecutorState):
 
         plan = state["plan"]
         if plan is None:
@@ -230,7 +230,7 @@ class AgenticSystem:
         if state.get("waiting_for_user"):
             return "end"
 
-        if plan.needs_clarification or plan.direct_answer:
+        if plan.needs_clarification or plan.direct_answer: # type: ignore
             return "end"
     
  
@@ -245,10 +245,10 @@ class AgenticSystem:
             print("Router returning aggregate")
             return "aggregate"
 
-        print("Router returening ",plan.tasks[task_index].tool )
-        return plan.tasks[task_index].tool
+        print("Router returening ",plan.tasks[task_index].tool ) # type: ignore
+        return plan.tasks[task_index].tool # type: ignore
 
-    def explanation_rag_node(self, state: ExecutorState):
+    def explanation_rag_node(self, state: VisualizationExecutorState):
         
         plan, task, task_index = self._dummy_worker_node(state)
         result = f"[explanation_rag_node] : {task.instruction}"
@@ -258,7 +258,7 @@ class AgenticSystem:
             "task_index": task_index + 1,
         }
     
-    def _dummy_worker_node(self, state: ExecutorState):
+    def _dummy_worker_node(self, state: VisualizationExecutorState):
         plan = state["plan"]
         task_index = state["task_index"]
 
@@ -288,7 +288,7 @@ class AgenticSystem:
         #    "task_index": task_index + 1,
         #}
 
-    def _get_current_task(self, state: ExecutorState):
+    def _get_current_task(self, state: VisualizationExecutorState):
         plan = state["plan"]
         task_index = state["task_index"]
 
@@ -302,11 +302,11 @@ class AgenticSystem:
 
         return plan, plan.tasks[task_index], task_index
 
-    def router_node(self, state: ExecutorState):
+    def router_node(self, state: VisualizationExecutorState):
         return {}
 
 
-    def direct_answer_node(self, state: ExecutorState):
+    def direct_answer_node(self, state: VisualizationExecutorState):
         _, task, _ = self._get_current_task(state)
 
         response = self.llm.invoke([
@@ -331,7 +331,7 @@ class AgenticSystem:
         )
 
 
-    def clarification_node(self, state: ExecutorState):
+    def clarification_node(self, state: VisualizationExecutorState):
         _, task, task_index = self._get_current_task(state)
 
         return {
@@ -342,9 +342,9 @@ class AgenticSystem:
 
     def _append_output(
         self,
-        state: ExecutorState,
+        state: VisualizationExecutorState,
         tool_name: str,
-        task: SystemTask,
+        task: VisualizationSystemTask,
         result: Any,
         context_key: str | None = None,
     ):
@@ -367,7 +367,7 @@ class AgenticSystem:
 
         return update
 
-    def aggregator_node(self, state: ExecutorState):
+    def aggregator_node(self, state: VisualizationExecutorState):
         facts = state.get("facts_context") or ""
         rag = state.get("rag_context") or ""
         plots = state.get("plot_context") or ""
@@ -389,7 +389,7 @@ class AgenticSystem:
             "final_answer": final_answer,
         }
 
-    def rag_retriever_node(self, state: ExecutorState):
+    def rag_retriever_node(self, state: VisualizationExecutorState):
         _, task, _ = self._get_current_task(state)
 
         result = f"[RAG retrieved context for]: {task.instruction}"
@@ -402,7 +402,7 @@ class AgenticSystem:
             context_key="rag_context",
         )
     
-    def data_analysis_node(self, state: ExecutorState):
+    def data_analysis_node(self, state: VisualizationExecutorState):
         plan, task, task_index = self._get_current_task(state)
 
         analyst_prompt = self.data_analysis_config.prompt
@@ -468,11 +468,11 @@ class AgenticSystem:
             {"role": "user", "content": user_query},
         ]
 
-        structured_llm = self.llm.with_structured_output(SystemPlan)
+        structured_llm = self.llm.with_structured_output(VisualizationSystemPlan)
         plan = structured_llm.invoke(messages)
         return plan 
             
-        state: ExecutorState = {
+        state: VisualizationExecutorState = {
             "user_query": user_query,
             "plan": None,
             "task_index": 0,
@@ -510,9 +510,8 @@ class AgenticSystem:
 
 
 
-
 if __name__ == "__main__":
 
     print("analyst models as main module")
-    system = AgenticSystem()
+    #system = xxAgenticSystem()
 

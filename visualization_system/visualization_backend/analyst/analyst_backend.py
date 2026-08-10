@@ -5,7 +5,7 @@ sys.path.append('../')
 sys.path.append('./')
 import warnings
 
-from typing import Any, Dict, List, Iterable, Literal, Union, Optional,TypedDict
+from typing import Any, Dict, Generic, List, Iterable, Literal, TypeVar, Union, Optional,TypedDict
 from typing_extensions import Self
    
 from uuid import uuid4
@@ -18,13 +18,14 @@ from langgraph.graph import StateGraph, END
 
 from langchain.agents import create_agent
 
+from visualization_system.common.base_plan import PlannerConfig
 #from visualization_system.visualization_backend.analyst.analyst_system import PlannerConfig, DirectAnswerConfig
-from visualization_system.visualization_backend.analyst.analyst_models import TableItemAgentResponse, SystemPlan, SystemTask 
+from visualization_system.visualization_backend.analyst.analyst_models import TableItemAgentResponse, VisualizationSystemPlanner, VisualizationSystemTask, VisualizationSystemPlan 
 from visualization_system.visualization_backend.analyst.smart_data import SmartData
 from visualization_system.visualization_backend.analyst.smart_data_tools import SmartDataTools
 from visualization_system.visualization_backend.analyst.analyst_system import SQLAnalystConfig
 
-from visualization_system.visualization_backend.analyst.prompts import planner_prompt3 
+from visualization_system.visualization_backend.analyst.prompts import visualization_planner_prompt3 
 from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
 from visualization_system.visualization_backend.analyst.prompts import chart_agent_prompt
 from visualization_system.visualization_backend.analyst.prompts import small_table_prompt
@@ -36,6 +37,11 @@ from visualization_system.visualization_backend.analyst.prompts import split_sub
 import pandas as pd, re, json  
 from langchain_core.messages import SystemMessage, HumanMessage
 from visualization_system.visualization_backend.global_models import UIState
+
+
+
+#TPlan = TypeVar("TPlan", bound=BaseModel)
+
  
   
 
@@ -129,38 +135,9 @@ class DataFrameResult(BaseModel):
     description: str | None = None
     dataframe: Any
 
-@dataclass 
-class PlannerConfig:
-    prompt :str = planner_prompt3
-
-class PlannerComponent:
-    def __init__(self, llm: Any,  config: PlannerConfig | None = None):
-        self.config = config if not config is None else PlannerConfig()
-        self.llm = llm
-
-    @property
-    def prompt(self) -> str:
-        return self.config.prompt
-
-    def run(self, user_query: str,previous_state = None ) -> SystemPlan:
-        return self.plan( user_query )
-    
-    def plan(self, user_query: str, previous_state = None ) -> SystemPlan:
-        messages = [
-            {"role": "system", "content": self.prompt},
-            {"role": "user", "content": user_query},
-        ]
-
-        structured_llm = self.llm.with_structured_output(SystemPlan)
-        return structured_llm.invoke(messages)
-    
-
-
-
-
 
 class RouterState(BaseModel):
-    plan: SystemPlan
+    plan: VisualizationSystemPlan
     task_index_to_execute: int = 0
     #waiting_for_user: bool = False
 
@@ -209,7 +186,7 @@ class ExecutorState(TypedDict):
     """
 
     user_query: str
-    plan: SystemPlan | None
+    plan: VisualizationSystemPlan | None
     task_index_to_execute: int
 
     facts_context: str
@@ -264,11 +241,11 @@ class TaskExecutionContext(BaseModel):
     Workers should not receive the full graph state.
     """
 
-    plan: SystemPlan = Field(
+    plan: VisualizationSystemPlan = Field(
         description="The full execution plan produced by the planner."
     )
 
-    task: SystemTask = Field(
+    task: VisualizationSystemTask = Field(
         description="The specific task to execute now."
     )
 
@@ -315,8 +292,6 @@ class TaskExecutionContextBuilder:
             facts_context=state.get("facts_context", ""),
         )
     
-
-
 class AgentTableResponse(BaseModel):
     # Literal ensures the LLM chooses only these specific strings
     agent: Literal["analyst"] = Field(
@@ -465,7 +440,7 @@ class AggregatorComponent:
 
         return "\n\n".join(parts)
     
-class AgenticSystem:
+class VisualizationAgenticSystem:
     """
     Minimal graph orchestrator.
 
@@ -476,7 +451,7 @@ class AgenticSystem:
     def __init__(
         self,
         llm: Any,
-        planner_component: PlannerComponent | None = None,
+        planner_component: VisualizationSystemPlanner | None = None,
         router_component: RouterComponent | None = None,
         direct_answer_component: DirectAnswerComponent | None = None,
         data_analyst_component: DataAnalystComponent | None = None,
@@ -484,7 +459,7 @@ class AgenticSystem:
     ):
         self.llm = llm
 
-        self.planner_component = planner_component or PlannerComponent(llm=llm)
+        self.planner_component = planner_component or VisualizationSystemPlanner(llm=llm, config=PlannerConfig(prompt=visualization_planner_prompt3))
         self.router_component = router_component or RouterComponent()
         self.direct_answer_component = direct_answer_component or DirectAnswerComponent(llm=llm)
         self.data_analyst_component = data_analyst_component or DataAnalystComponent(llm=llm)
@@ -544,6 +519,7 @@ class AgenticSystem:
     def planner_node(self, state: ExecutorState):
         plan = self.planner_component.run(state["user_query"])
 
+        print("Plan created")
         return {
             "plan": plan,
             "task_index_to_execute": 0,
@@ -570,9 +546,10 @@ class AgenticSystem:
             #waiting_for_user=state.get("waiting_for_user", False),
         )
 
+        print(f"Routing next task: task_index_to_execute={state['task_index_to_execute']}, total tasks={len(plan.tasks)}")
         return self.router_component.run(router_state)
 
-    def _get_current_task(self, state: ExecutorState) -> SystemTask:
+    def _get_current_task(self, state: ExecutorState) -> VisualizationSystemTask:
         plan = state["plan"]
 
         if plan is None:
@@ -600,11 +577,13 @@ class AgenticSystem:
     def data_analysis_node(self, state: ExecutorState):
         task = self._get_current_task(state)
 
+        print("Running the sql analyst")
         task_result = self.data_analyst_component.run(
                 query=task.instruction,
                 facts_context=state.get("facts_context", ""),
             )
-        
+
+        print("done")
         return self.state_updater.append_result(state, task_result)
 
     def aggregator_node(self, state: ExecutorState):
@@ -632,7 +611,10 @@ class AgenticSystem:
             "clarification_request": None,
         }
 
+        if self.app is None:
 
+            raise RuntimeError("Graph app is not compiled. Call create_graph() and compile_graph() first.")
+            
         return self.app.invoke(initial_state)
     
  

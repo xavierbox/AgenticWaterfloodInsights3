@@ -1,9 +1,16 @@
 
 from typing_extensions import Self
-from typing import Any, Dict, List, Iterable, Literal, Union, Optional,TypedDict
+from typing import Any, Dict, Generic, List, Iterable, Literal, TypeVar, Union, Optional,TypedDict
 from typing_extensions import Self
-
 from pydantic import BaseModel, Field
+
+from visualization_system.common.base_plan import PlannerComponent, PlannerConfig
+from visualization_system.common.base_task import BaseSystemTask
+#from visualization_system.common.system_plan import SystemPlan
+
+
+#TTask = TypeVar("TTask", bound=BaseSystemTask)
+
 
 
 class TableItemAgentResponse(BaseModel):
@@ -30,7 +37,7 @@ class AgentTableResponse(BaseModel):
     #text : Optional[str]  = Field(default=None, description="textual response summarizing small tables")
     #tables: List[TableItemAgentResponse] = Field(default_factory=list, description="List of materialized output tables")
 
-class SystemTask(BaseModel):
+class VisualizationSystemTask(BaseSystemTask):
     agent: Literal[
         "direct_answer",
         "rag_retriever",
@@ -40,16 +47,7 @@ class SystemTask(BaseModel):
         description="The specific domain expert agent assigned to execute this task phase."
    )
 
-    instruction: str = Field(
-      description=(
-            "The comprehensive, high-level objective for this agent phase. "
-            "Do NOT break down sub-steps, intermediate calculations, or plotting adjustments. "
-            "Provide the complete end-goal description verbatim so the receiving agent "
-            "can handle its own internal execution steps."
-        )
-    )
-
-class SystemPlan(BaseModel):
+class VisualizationSystemPlan(BaseModel):
     
     #agent: Literal["planner"] = Field(
     #    description="Fixed identifier for the planner agent."
@@ -59,7 +57,7 @@ class SystemPlan(BaseModel):
         description="One-sentence summary of the user's ultimate goal."
     )
 
-    tasks: List[SystemTask] = Field(
+    tasks: List[VisualizationSystemTask] = Field(
         description=(
             "The macro-level pipeline. Create an individual task entry for EACH distinct "
             "question or request found inside the user's prompt. "
@@ -84,21 +82,31 @@ class SystemPlan(BaseModel):
 
     direct_answer: str | None = None
 
-class ToolOutput(BaseModel):
+class VisualizationSystemPlanner(
+    PlannerComponent[VisualizationSystemPlan]
+):
+    def __init__(self, llm: Any, config: PlannerConfig):
+        super().__init__(
+            llm=llm,
+            config=config,
+            plan_model=VisualizationSystemPlan,
+        )
+
+class VisualizationToolOutput(BaseModel):
     tool_name: str
-    task: SystemTask
+    task: VisualizationSystemTask
     result: str
 
-class ExecutorState(TypedDict):
+class VisualizationExecutorState(TypedDict):
     user_query: str
-    plan: SystemPlan | None
+    plan: VisualizationSystemPlan | None
     task_index: int
 
     facts_context: str
     rag_context: str
     plot_context: str
 
-    tool_outputs: list[ToolOutput]
+    tool_outputs: list[VisualizationToolOutput]
 
     final_answer: str | None
     waiting_for_user: bool

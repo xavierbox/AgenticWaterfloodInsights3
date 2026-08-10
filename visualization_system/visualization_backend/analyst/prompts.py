@@ -123,7 +123,7 @@ dependency pipeline:
 
 
 
-planner_prompt3 = """
+visualization_planner_prompt3 = """
 You are the PLANNER AGENT. 
 
 ===============================================================================

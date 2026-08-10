@@ -1,5 +1,7 @@
 from __future__ import annotations
 from visualization_system.visualization_backend.analyst.catalog import * 
+from visualization_system.common.domain_tools import DomainToolkit 
+
 #from runtime.v4.analyst_agent.smart_data import SmartData
 
 from typing import Dict, List, Tuple, Optional, Any 
@@ -14,9 +16,10 @@ if TYPE_CHECKING:
 
 
 
-class SmartDataTools:
+class SmartDataTools(DomainToolkit):
 
     def __init__(self, data:SmartData):
+        super().__init__()
         self._data = data 
 
     # ----------------------------------------
@@ -151,32 +154,6 @@ class SmartDataTools:
         """Returns a brief textual description of a single table"""
         return self._data.get_single_table_brief_description( table_name )  
 
-
-
-    def get_tools(self):#, include_planning_tools: bool = False):
-        tools = []
-        
-        for name in dir(self):
-            if name.startswith("_") or name == "get_tools":
-                continue
-            #if not include_planning_tools and name in planning_tools:
-            #    continue
-                
-            attr = getattr(self, name)
-            if not attr.__doc__:
-                continue
-
-
-            if callable(attr) and attr.__doc__:
-                tools.append(
-                    StructuredTool.from_function(
-                        func=attr,
-                        name=name,
-                        description=inspect.getdoc(attr),
-                    )
-                )
-        return tools
-    
     def materialize_select( self, table_name, rows )->str:
         """
         Return a full table to produce a textual response. 
