@@ -11,7 +11,7 @@ from typing_extensions import Self
 from uuid import uuid4
  
 from pydantic import BaseModel, Field 
-from get_llm_model import azure_llm_if
+from visualization_system.visualization_backend.get_llm_model import azure_llm_if
 from pathlib import Path
 from langchain.agents.structured_output import ToolStrategy
 from langgraph.graph import StateGraph, END

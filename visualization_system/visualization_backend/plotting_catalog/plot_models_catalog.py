@@ -1,10 +1,10 @@
 from enum import Enum
 from typing import Dict, List, Literal, Optional, Union, Any
-import pprint, inspect
 from pydantic import BaseModel, Field
+import pprint, inspect
 
 from   visualization_backend.global_constants import CRMDATASET
-import visualization_backend.plotting.plot_functions as plot_functions 
+import visualization_backend.plotting_catalog.plot_functions as plot_functions 
 
 
 class PlotStringParameter(BaseModel):
@@ -73,7 +73,6 @@ class WORPlot(PlotCatalogItem):
         ),
     })
 
-
 class VRRPlot(PlotCatalogItem):
     display_name: str = "VRR vs cumulative water injected"
     function: str = "plot_vrr_vs_cumulative_water_injected"
@@ -97,18 +96,17 @@ class VRRPlot(PlotCatalogItem):
             description="Gas formation volume factor",
             value=0.005,
         ),
-        "split_by_well": PlotBoolParameter(
-            display_name="Split by Well",
-            description="Whether to split by well",
-            value=True,
-        ),
+        #"split_by_well": PlotBoolParameter(
+        #    display_name="Split by Well",
+        #    description="Whether to split by well",
+        #    value=True,
+        #),
         "split_by_sector": PlotBoolParameter(
             display_name="Split by Sector",
             description="Whether to split by sector",
             value=False,
         ),
     })
-
 
 class HallPlot(PlotCatalogItem):
     display_name: str = "Hall Plot"
@@ -118,7 +116,6 @@ class HallPlot(PlotCatalogItem):
     data_context: List[str] = Field(default_factory=lambda: [CRMDATASET])
     category: str = "Diagnostic"
 
-
 class WellCount(PlotCatalogItem):
     display_name: str = "Well count over time"
     function: str = "plot_well_count_over_time"
@@ -127,10 +124,8 @@ class WellCount(PlotCatalogItem):
     data_context: List[str] = Field(default_factory=lambda: [CRMDATASET])
     category: str = "Monitoring"
 
-
 class PlotCatalog(BaseModel):
     items: List[PlotCatalogItem] = Field(default_factory=list)
-
 
 class HallPlot2(PlotCatalogItem):
     display_name: str = "Hall Plot2"
@@ -139,7 +134,6 @@ class HallPlot2(PlotCatalogItem):
     application: str = "Useful for diagnosing injectivity changes, formation damage, and stimulation effects."
     data_context: List[str] = Field(default_factory=lambda: [CRMDATASET])
     category: str = "Diagnostic"
-
 
 class WellCount2(PlotCatalogItem):
     display_name: str = "Well count over time2"
@@ -156,13 +150,7 @@ def get_historical_data_plot_catalog() -> PlotCatalog:
             WORPlot(),
             VRRPlot(),
             HallPlot(),
-            WellCount(),
-
-                 HallPlot2(),
-            WellCount2(),
-
-                 HallPlot2(),
-            WellCount2(),
+            WellCount()
         ]
     )
 
@@ -221,6 +209,11 @@ def generate_plots(data, items: List[PlotCatalogItem]):
             results.append(result)
 
     return results
+
+
+
+
+
 
 
 if __name__ == "__main__":

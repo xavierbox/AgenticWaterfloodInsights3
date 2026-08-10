@@ -8,12 +8,12 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 
-from visualization_backend.plotting.plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
+from visualization_backend.plotting_catalog.plot_models_catalog import * #PlotCatalogItem, get_historical_data_plot_catalog
 from visualization_backend.global_constants import *  
 from visualization_backend.global_models import UIState
 
 from temporal_and_aux import * 
-from visualization_system.visualization_backend.all_classes import * 
+from visualization_system.visualization_backend.analyst.analyst_backend import * 
 
 app = Flask(__name__)
 
@@ -276,6 +276,8 @@ def index():
     #return render_template("catalog1.html")
     #return render_template("index.html")
     return render_template("test_tabs_control.html")#//("index.html")
+    return render_template("index1.html");#("test_tabs_control.html")#//("index.html")
+
 
 @app.get("/fetch_known_plots_catalog")
 def fetch_known_plots_catalog():

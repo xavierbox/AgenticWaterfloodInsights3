@@ -6,7 +6,6 @@
 
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
-  <link rel="stylesheet" href="./styles.css">
   <!--script src="./tabs_control.js"></script-->
   <!--script src="./app_components.js"></script-->
   
@@ -48,15 +47,129 @@
 <button id="chat-play" class="btn btn-primary">chat play</button>
 
 
- <new-three-column-main-layout id ='main-layout'></new-three-column-main-layout>
- <tabs-component id="tabs"></tabs-component>
+<new-three-column-main-layout id ='main-layout'></new-three-column-main-layout>
+<tabs-component id="tabs"></tabs-component>
+
+
  
 <charts-catalog-control2 id="charts-catalog"></charts-catalog-control2>
 
+<!--
 <chat-dialog id="genai-chat-dialog"></chat-dialog>
+-->
 
 
 <script>
+
+function initialize(){
+    
+    console.log("Initializing...")
+    document.documentElement.setAttribute("data-theme", "light");
+ 
+    let layout = document.getElementById('main-layout');
+    let tabs = document.getElementById("tabs");
+    layout.set('middle', tabs)
+    
+
+    let charts_catalog =  document.getElementById("charts-catalog");
+    layout.set('right', charts_catalog);
+    
+    
+
+
+
+    const chartDiv = document.createElement("div");
+    chartDiv.style.width="100%";
+    chartDiv.style.height="100%";
+    
+    //const chartIcon = document.createElement("i");
+    //chartIcon.className = "fa-solid fa-globe";
+    const chartIcon = Object.assign(document.createElement("i"), {className: "fa-solid fa-globe"});
+
+    //let catalog = document.getElementById("charts-catalog")
+    //layout.set( 'right', catalog );
+    //tabs.addTabWithContent("Home", catalog,chartIcon);
+    //tabs.disableClose("Home", true);
+
+
+    document.querySelector(".layout-hide-left-button").click();
+    document.querySelector("#fetch-catalog").click();
+
+
+
+
+
+
+const data = [
+  {
+    x: ["Jan", "Feb", "Mar", "Apr", "May"],
+    y: [10, 15, 13, 18, 22],
+    type: "scatter",
+    mode: "lines+markers",
+    name: "Dummy series"
+  }
+];
+
+Plotly.newPlot(chartDiv, data, {
+  autosize: true,
+  margin: {
+    l: 30,
+    r: 10,
+    t: 25,
+    b: 30
+  },
+  xaxis: {
+    automargin: true
+  },
+  yaxis: {
+    automargin: true
+  }
+}, {
+  responsive: true,
+  displayModeBar: false
+});
+
+
+    tabs.addTabWithContent("Dashboard", "This is the dashboard tab.", "📊");
+    tabs.addTabWithContent("Settings", "Configuration goes here.", "⚙️");
+
+    tabs.disableClose("Home", true);
+
+    tabs.addEventListener("tab-selected", function (event) {
+      console.log("Selected tab:", event.detail.name, event.detail.index);
+    });
+
+    let counter = 1;
+
+    document.getElementById("add-tab-button").addEventListener("click", function () {
+      const name = "New Tab " + counter;
+      tabs.addTabWithContent(name, "Text content for " + name, "✨");
+      tabs.selectTab(name);
+      counter += 1;
+    });
+
+
+
+    window.addEventListener("resize", () => {
+    relayout(chartDiv);
+    });
+
+    layout.addEventListener("pane-resized", () => {
+    relayout(chartDiv);
+    });
+
+}
+
+document.addEventListener("DOMContentLoaded", (event) => { 
+
+    console.log("calling initialize"); 
+    initialize();
+
+})
+
+</script>
+
+<!--script>
 
 /**
  * Extract and display ANY server-side error using SweetAlert2
@@ -297,103 +410,6 @@ function relayout( container){
 
 }
 
-function addChartToDashboard( chart_info ){
-
-    alert("[addChartToDashboard] adding chart to dashboard");
-    console.log( 'chart info', chart_info )
-
-}
-
-function initialize(){
-    
-    document.documentElement.setAttribute("data-theme", "light");
- 
-    let layout = document.getElementById('main-layout');
-    let tabs = document.getElementById("tabs");
-
-    layout.set('middle', tabs)
-    
-    const chartDiv = document.createElement("div");
-    chartDiv.style.width="100%";
-    chartDiv.style.height="100%";
-    
-    //const chartIcon = document.createElement("i");
-    //chartIcon.className = "fa-solid fa-globe";
-    const chartIcon = Object.assign(document.createElement("i"), {className: "fa-solid fa-globe"});
-
-    let catalog = document.getElementById("charts-catalog")
-    layout.set( 'right', catalog );
-    //tabs.addTabWithContent("Home", catalog,chartIcon);
-    //tabs.disableClose("Home", true);
-
-
-    document.querySelector(".layout-hide-left-button").click();
-    document.querySelector("#fetch-catalog").click();
-
-
-
-
-
-
-const data = [
-  {
-    x: ["Jan", "Feb", "Mar", "Apr", "May"],
-    y: [10, 15, 13, 18, 22],
-    type: "scatter",
-    mode: "lines+markers",
-    name: "Dummy series"
-  }
-];
-
-Plotly.newPlot(chartDiv, data, {
-  autosize: true,
-  margin: {
-    l: 30,
-    r: 10,
-    t: 25,
-    b: 30
-  },
-  xaxis: {
-    automargin: true
-  },
-  yaxis: {
-    automargin: true
-  }
-}, {
-  responsive: true,
-  displayModeBar: false
-});
-
-
-    tabs.addTabWithContent("Data", "This is the data tab.", "📊");
-    tabs.addTabWithContent("Settings", "Configuration goes here.", "⚙️");
-
-    tabs.disableClose("Home", true);
-
-    tabs.addEventListener("tab-selected", function (event) {
-      console.log("Selected tab:", event.detail.name, event.detail.index);
-    });
-
-    let counter = 1;
-
-    document.getElementById("add-tab-button").addEventListener("click", function () {
-      const name = "New Tab " + counter;
-      tabs.addTabWithContent(name, "Text content for " + name, "✨");
-      tabs.selectTab(name);
-      counter += 1;
-    });
-
-
-
-    window.addEventListener("resize", () => {
-    relayout(chartDiv);
-    });
-
-    layout.addEventListener("pane-resized", () => {
-    relayout(chartDiv);
-    });
-
-}
 
 function initializeChatAnalyst(){
 
@@ -491,14 +507,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
     document.getElementById("charts-catalog").addEventListener("generate-dashboard-plots", async (event) => {
-        
-        alert("Generating single dashboard plot or table")
-
-
         const selectedPlots = event.detail.selectedPlots;
-        console.log( selectedPlots );
-
-         
 
         const response = await fetch("/generate_dashboard_plots", {
         method: "POST",
@@ -510,8 +519,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const result = await response.json();
 
-        addChartToDashboard( result );
-       
         console.log("Backend response:", result);
     });
 
@@ -703,6 +710,6 @@ document.getElementById("chat-play").addEventListener( "click", ()=>{
 
 
 
-  </script>
+  </script-->
 </body>
 </html>

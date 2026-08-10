@@ -840,20 +840,6 @@ class ChartsCatalogControl extends HTMLElement {
     genaiOutput.classList.toggle("hidden", !isGenAi);
     }
 
-    old_setCatalogViewMode(mode) {
-    const list = this.querySelector('[data-role="charts-catalog-list"]');
-    const genai = this.querySelector('[data-role="charts-catalog-genai-panel"]');
-    const workspace = this.querySelector('[data-role="charts-catalog-workspace"]');
-
-    const isGenAi = mode === "genai";
-
-    list.classList.toggle("hidden", isGenAi);
-    genai.classList.toggle("hidden", !isGenAi);
-
-    if (workspace) {
-        workspace.classList.toggle("hidden", isGenAi);
-    }
-    }
 
     render1() {
     this.innerHTML = `
@@ -963,10 +949,12 @@ class ChartsCatalogControl extends HTMLElement {
             <div class="charts-catalog-right-footer">
             <button
                 data-role="charts-catalog-generate"
-                class="btn btn-warning w-100"
+      
+                class="btn btn-outline-primary btn-sm charts-catalog-preview-button"
             >
                 Generate
             </button>
+
             </div>
         </section>
 
@@ -1439,25 +1427,6 @@ chip.addEventListener("click", () => {
     }, null, 2));
   }
 
-  old_updateParameterButtonsState() {
-    if (!this.catalog || !this.selectedPlot) {
-      this.applyButton.disabled = true;
-      this.resetButton.disabled = true;
-      return;
-    }
-
-    const selectedIndex = this.catalog.items.findIndex(
-      p => p.function === this.selectedPlot.function
-    );
-
-    const isDisplayedPlotSelected =
-      selectedIndex >= 0 && this.selectedPlotIndexes.includes(selectedIndex);
-
-    this.applyButton.disabled = !isDisplayedPlotSelected;
-    this.resetButton.disabled = !isDisplayedPlotSelected;
-  }
-
-
 
   updateParameterButtonsState() {
   const actions = this.querySelector(
@@ -1519,6 +1488,914 @@ chip.addEventListener("click", () => {
 
 }
 customElements.define("charts-catalog-control", ChartsCatalogControl);
+
+
+
+
+class ChartsCatalogControl2 extends HTMLElement {
+  constructor() {
+    super();
+
+    this.catalog = null;
+    this.selectedPlot = null;
+    this.selectedPlotIndex = null;
+    this.editedParametersByFunction = {};
+    this.editor = null;
+    this.activeCategory = "All";
+
+    this.applyButton = null;
+    this.resetButton = null;
+    this.previewButton = null;
+    this.generateButton = null;
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+
+  
+render() {
+  this.innerHTML = `
+    <div class="charts-catalog-split-layout">
+
+      <!-- Left column -->
+      <section
+        data-role="charts-catalog-left-panel"
+        class="pane xxwf-panel"
+      >
+        <div class="wf-panel-header">
+          Plot catalog
+        </div>
+
+        <div class="wf-panel-body charts-catalog-catalog-area">
+
+          <div
+            data-role="charts-catalog-category-filters"
+            class="wf-filter-placeholder"
+          ></div>
+
+          <div
+            data-role="charts-catalog-list"
+            class="charts-catalog-list-panel"
+          ></div>
+
+          <div
+            data-role="charts-catalog-genai-panel"
+            class="charts-catalog-genai-panel hidden"
+          ></div>
+
+        </div>
+      </section>
+
+      <!-- Draggable separator -->
+      <div
+        data-role="charts-catalog-resizer"
+        class="charts-catalog-resizer separator"
+      ></div>
+
+      <!-- Right column -->
+      <section
+        data-role="charts-catalog-right-panel"
+        class="pane xxwf-panel"
+      >
+        <div class="wf-panel-body charts-catalog-middle-body">
+
+          <div
+            data-role="charts-catalog-genai-output"
+            class="charts-catalog-genai-output hidden"
+          >
+            Agent output placeholder...
+          </div>
+
+          <div
+            data-role="charts-catalog-workspace"
+            class="charts-catalog-workspace"
+          >
+
+            <div
+              data-role="charts-catalog-parameter-editor"
+              class="charts-catalog-parameter-editor"
+            ></div>
+
+            <div
+              data-role="charts-catalog-parameter-actions"
+              class="charts-catalog-actions hidden"
+            >
+              <button
+                data-role="charts-catalog-apply-parameters"
+                class="btn btn-success btn-sm"
+                disabled
+              >
+                Apply parameters
+              </button>
+
+              <button
+                data-role="charts-catalog-reset-parameters"
+                class="btn btn-primary btn-sm"
+                disabled
+              >
+                Reset parameters
+              </button>
+            </div>
+
+            <div class="charts-catalog-actions">
+
+              <button
+                data-role="charts-catalog-preview-button"
+                class="btn btn-outline-primary btn-sm charts-catalog-preview-button"
+                disabled
+              >
+                Preview
+              </button>
+
+              <button
+                data-role="charts-catalog-generate"
+                class="btn btn-outline-primary btn-sm"
+                disabled
+              >
+                Dashboard ➕
+              </button>
+
+            </div>
+
+            <div
+              data-role="charts-catalog-preview"
+              class="charts-catalog-preview-panel"
+            >
+              Preview placeholder...
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  `;
+
+  this.bindButtons();
+  this.bindColumnResizer();
+  this.updateControlState();
+}
+
+resizePreviewPlots() {
+  requestAnimationFrame(() => {
+    if (!window.Plotly) {
+      return;
+    }
+
+    this.querySelectorAll(".js-plotly-plot").forEach(plot => {
+      window.Plotly.Plots.resize(plot);
+    });
+  });
+}
+
+bindColumnResizer() {
+  const layout = this.querySelector(
+    ".charts-catalog-split-layout"
+  );
+
+  const resizer = this.querySelector(
+    '[data-role="charts-catalog-resizer"]'
+  );
+
+  if (!layout || !resizer) {
+    return;
+  }
+
+  const minimumLeftWidth = 260;
+  const minimumRightWidth = 400;
+  const separatorWidth = 8;
+
+  let dragging = false;
+
+  const stopDragging = event => {
+    if (!dragging) {
+      return;
+    }
+
+    dragging = false;
+
+    resizer.classList.remove("dragging");
+
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+
+    if (
+      event?.pointerId !== undefined &&
+      resizer.hasPointerCapture(event.pointerId)
+    ) {
+      resizer.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  resizer.addEventListener("pointerdown", event => {
+    dragging = true;
+
+    resizer.classList.add("dragging");
+    resizer.setPointerCapture(event.pointerId);
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    event.preventDefault();
+  });
+
+  resizer.addEventListener("pointermove", event => {
+    if (!dragging) {
+      return;
+    }
+
+    const bounds = layout.getBoundingClientRect();
+
+    const maximumLeftWidth =
+      bounds.width -
+      minimumRightWidth -
+      separatorWidth;
+
+    const requestedLeftWidth =
+      event.clientX - bounds.left;
+
+    const leftWidth = Math.min(
+      Math.max(requestedLeftWidth, minimumLeftWidth),
+      maximumLeftWidth
+    );
+
+    layout.style.gridTemplateColumns =
+      `${leftWidth}px ${separatorWidth}px minmax(${minimumRightWidth}px, 1fr)`;
+
+    this.resizePreviewPlots();
+  });
+
+  resizer.addEventListener("pointerup", stopDragging);
+  resizer.addEventListener("pointercancel", stopDragging);
+}
+
+  render_old() {
+    this.innerHTML = `
+      <div
+        class="wf-main-grid charts-catalog-two-column-grid"
+        style="grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.4fr);"
+      >
+        <!-- Left column: catalog / GenAI chat -->
+        <section class="pane xxwf-panel">
+          <div class="wf-panel-header">
+            Plot catalog
+          </div>
+
+          <div class="wf-panel-body charts-catalog-catalog-area">
+            <div
+              data-role="charts-catalog-category-filters"
+              class="wf-filter-placeholder"
+            ></div>
+
+            <div
+              data-role="charts-catalog-list"
+              class="charts-catalog-list-panel"
+            ></div>
+
+            <div
+              data-role="charts-catalog-genai-panel"
+              class="charts-catalog-genai-panel hidden"
+            ></div>
+          </div>
+        </section>
+
+        <!-- Right column: parameters / preview / GenAI output -->
+        <section class="pane xxwf-panel">
+          <div class="wf-panel-body charts-catalog-middle-body">
+            <div
+              data-role="charts-catalog-genai-output"
+              class="charts-catalog-genai-output hidden"
+            >
+              Agent output placeholder...
+            </div>
+
+            <div
+              data-role="charts-catalog-workspace"
+              class="charts-catalog-workspace"
+            >
+              <div
+                data-role="charts-catalog-parameter-editor"
+                class="charts-catalog-parameter-editor"
+              ></div>
+
+              <div
+                data-role="charts-catalog-parameter-actions"
+                class="charts-catalog-actions hidden"
+              >
+                <button
+                  data-role="charts-catalog-apply-parameters"
+                  class="btn btn-success btn-sm"
+                  disabled
+                >
+                  Apply parameters
+                </button>
+
+                <button
+                  data-role="charts-catalog-reset-parameters"
+                  class="btn btn-primary btn-sm"
+                  disabled
+                >
+                  Reset parameters
+                </button>
+              </div>
+
+              <div class="charts-catalog-actions"
+               
+                        >
+                <button
+                  data-role="charts-catalog-preview-button"
+                  class="btn btn-outline-primary btn-sm charts-catalog-preview-button"
+                  disabled
+                >
+                  Preview
+                </button>
+
+                <button
+                  data-role="charts-catalog-generate"
+                  class="btn btn-outline-primary btn-sm charts-catalog-generate-button"
+                  disabled
+                >
+                  Dashboard ➕
+                </button>
+              </div>
+
+              <div
+                data-role="charts-catalog-preview"
+                class="charts-catalog-preview-panel"
+              >
+                Preview placeholder...
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+
+    this.bindButtons();
+    this.updateControlState();
+  }
+  bindButtons() {
+    this.applyButton = this.querySelector(
+      '[data-role="charts-catalog-apply-parameters"]'
+    );
+
+    this.resetButton = this.querySelector(
+      '[data-role="charts-catalog-reset-parameters"]'
+    );
+
+    this.previewButton = this.querySelector(
+      '[data-role="charts-catalog-preview-button"]'
+    );
+
+    this.generateButton = this.querySelector(
+      '[data-role="charts-catalog-generate"]'
+    );
+
+    this.applyButton?.addEventListener("click", () => {
+      this.applyParameters();
+    });
+
+    this.resetButton?.addEventListener("click", () => {
+      this.resetParameters();
+    });
+
+    this.previewButton?.addEventListener("click", () => {
+      const selectedPlots = this.getSelected();
+
+      console.log("Preview plot:", selectedPlots);
+
+      this.dispatchEvent(
+        new CustomEvent("preview-dashboard-plot", {
+          detail: {
+            selectedPlot: selectedPlots[0] ?? null
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+    });
+
+    this.generateButton?.addEventListener("click", () => {
+      const selectedPlots = this.getSelected();
+
+      console.log("Selected plots:", selectedPlots);
+
+      this.dispatchEvent(
+        new CustomEvent("generate-dashboard-plots", {
+          detail: {
+            selectedPlots
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+    });
+  }
+
+  setCatalog(catalog) {
+    this.catalog = catalog;
+    this.selectedPlot = null;
+    this.selectedPlotIndex = null;
+    this.editedParametersByFunction = {};
+    this.activeCategory = "All";
+
+    if (this.editor) {
+      this.editor.destroy();
+      this.editor = null;
+    }
+
+    const editorContainer = this.querySelector(
+      '[data-role="charts-catalog-parameter-editor"]'
+    );
+
+    if (editorContainer) {
+      editorContainer.replaceChildren();
+    }
+
+    this.renderCategoryFilters();
+    this.renderCatalog();
+    this.setCatalogViewMode("catalog");
+    this.applyCategoryFilter();
+    this.clearPreview();
+    this.updateControlState();
+  }
+
+  setCatalogViewMode(mode) {
+    const list = this.querySelector(
+      '[data-role="charts-catalog-list"]'
+    );
+
+    const genaiPanel = this.querySelector(
+      '[data-role="charts-catalog-genai-panel"]'
+    );
+
+    const workspace = this.querySelector(
+      '[data-role="charts-catalog-workspace"]'
+    );
+
+    const genaiOutput = this.querySelector(
+      '[data-role="charts-catalog-genai-output"]'
+    );
+
+    const isGenAi = mode === "genai";
+
+    list?.classList.toggle("hidden", isGenAi);
+    genaiPanel?.classList.toggle("hidden", !isGenAi);
+    workspace?.classList.toggle("hidden", isGenAi);
+    genaiOutput?.classList.toggle("hidden", !isGenAi);
+  }
+
+  renderCategoryFilters() {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-category-filters"]'
+    );
+
+    if (!container || !Array.isArray(this.catalog?.items)) {
+      return;
+    }
+
+    const categories = [
+      "All",
+      ...new Set([
+        ...this.catalog.items.map(
+          plot => plot.category || "General"
+        ),
+        "GenAi"
+      ])
+    ];
+
+    container.replaceChildren();
+
+    categories.forEach(category => {
+      const chip = document.createElement("span");
+
+      chip.className = "wf-filter-chip";
+      chip.textContent = category;
+
+      if (category === this.activeCategory) {
+        chip.classList.add("active");
+      }
+
+      chip.addEventListener("click", () => {
+        this.activeCategory = category;
+
+        this.renderCategoryFilters();
+
+        if (category === "GenAi") {
+          this.setCatalogViewMode("genai");
+          return;
+        }
+
+        this.setCatalogViewMode("catalog");
+        this.applyCategoryFilter();
+      });
+
+      container.appendChild(chip);
+    });
+  }
+
+  applyCategoryFilter() {
+    if (!Array.isArray(this.catalog?.items)) {
+      return;
+    }
+
+    this.querySelectorAll(".charts-catalog-card").forEach(card => {
+      const index = Number(card.dataset.index);
+      const plot = this.catalog.items[index];
+
+      const isVisible =
+        this.activeCategory === "All" ||
+        (plot.category || "General") === this.activeCategory;
+
+      card.classList.toggle("hidden", !isVisible);
+    });
+  }
+
+  renderCatalog() {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-list"]'
+    );
+
+    if (!container) {
+      return;
+    }
+
+    container.replaceChildren();
+
+    if (!Array.isArray(this.catalog?.items)) {
+      container.innerHTML = `
+        <div class="alert alert-secondary">
+          No catalog loaded.
+        </div>
+      `;
+      return;
+    }
+
+    this.catalog.items.forEach((plot, index) => {
+      const card = document.createElement("div");
+
+      card.className = "card charts-catalog-card";
+      card.dataset.index = String(index);
+
+      card.innerHTML = `
+        <div class="charts-catalog-card-header">
+          <div class="charts-catalog-card-title">
+            ${plot.display_name}
+          </div>
+        </div>
+
+        <div class="charts-catalog-card-description">
+          ${plot.description || ""}
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        this.selectPlot(index);
+      });
+
+      container.appendChild(card);
+    });
+
+    this.updateCardSelectionStyles();
+  }
+
+  selectPlot(index) {
+    if (!this.catalog?.items?.[index]) {
+      return;
+    }
+
+    this.selectedPlotIndex = index;
+    this.selectedPlot = this.catalog.items[index];
+
+    this.updateCardSelectionStyles();
+    this.renderParameterEditor(this.selectedPlot);
+    this.updateControlState();
+
+    this.dispatchEvent(
+      new CustomEvent("charts-catalog-selection-changed", {
+        detail: {
+          selectedPlot: this.getSelected()[0] ?? null,
+          selectedIndex: index
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  updateCardSelectionStyles() {
+    this.querySelectorAll(".charts-catalog-card").forEach(card => {
+      const index = Number(card.dataset.index);
+      const isSelected = index === this.selectedPlotIndex;
+
+      card.classList.toggle("selected", isSelected);
+    });
+  }
+
+  hasEditableParameters(plot) {
+    return Boolean(
+      plot?.parameters &&
+      Object.keys(plot.parameters).length > 0
+    );
+  }
+
+  renderParameterEditor(plot) {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-parameter-editor"]'
+    );
+
+    if (!container) {
+      return;
+    }
+
+    if (this.editor) {
+      this.editor.destroy();
+      this.editor = null;
+    }
+
+    container.replaceChildren();
+
+    const parameters = plot?.parameters || {};
+
+    if (Object.keys(parameters).length === 0) {
+      return;
+    }
+
+    const schema = this.buildSchemaFromParameters(parameters);
+
+    const data =
+      this.editedParametersByFunction[plot.function] ??
+      this.buildDataFromParameters(parameters);
+
+    this.editor = new JSONEditor(container, {
+      schema,
+      startval: data,
+      theme: "bootstrap5",
+      disable_edit_json: true,
+      disable_properties: true,
+      no_additional_properties: true,
+      compact: true
+    });
+  }
+
+  buildSchemaFromParameters(parameters) {
+    const properties = {};
+
+    Object.entries(parameters).forEach(([key, parameter]) => {
+      properties[key] = {
+        title: parameter.display_name,
+        description: parameter.description,
+        type: this.mapParameterType(parameter.type)
+      };
+    });
+
+    return {
+      type: "object",
+      title: "Parameters",
+      properties
+    };
+  }
+
+  buildDataFromParameters(parameters) {
+    const data = {};
+
+    Object.entries(parameters).forEach(([key, parameter]) => {
+      data[key] = parameter.value;
+    });
+
+    return data;
+  }
+
+  mapParameterType(type) {
+    const typeMap = {
+      string: "string",
+      float: "number",
+      int: "integer",
+      bool: "boolean"
+    };
+
+    return typeMap[type] || "string";
+  }
+
+  applyParameters() {
+    if (!this.selectedPlot || !this.editor) {
+      return;
+    }
+
+    const errors = this.editor.validate();
+
+    if (errors.length > 0) {
+      console.log("Parameter validation errors:", errors);
+      return;
+    }
+
+    const values = this.editor.getValue();
+
+    this.editedParametersByFunction[
+      this.selectedPlot.function
+    ] = values;
+
+    console.log(
+      JSON.stringify(
+        {
+          message: "Parameters applied",
+          function: this.selectedPlot.function,
+          parameters: values
+        },
+        null,
+        2
+      )
+    );
+
+    this.dispatchEvent(
+      new CustomEvent("charts-catalog-parameters-applied", {
+        detail: {
+          selectedPlot: this.getSelected()[0] ?? null
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  resetParameters() {
+    if (!this.selectedPlot) {
+      return;
+    }
+
+    delete this.editedParametersByFunction[
+      this.selectedPlot.function
+    ];
+
+    this.renderParameterEditor(this.selectedPlot);
+    this.updateControlState();
+
+    console.log(
+      JSON.stringify(
+        {
+          message: "Parameters reset",
+          display_name: this.selectedPlot.display_name,
+          function: this.selectedPlot.function,
+          parameters: this.buildDataFromParameters(
+            this.selectedPlot.parameters || {}
+          )
+        },
+        null,
+        2
+      )
+    );
+  }
+
+  updateControlState() {
+    const parameterActions = this.querySelector(
+      '[data-role="charts-catalog-parameter-actions"]'
+    );
+
+    const hasSelection = Boolean(this.selectedPlot);
+    const hasParameters = this.hasEditableParameters(
+      this.selectedPlot
+    );
+
+    parameterActions?.classList.toggle(
+      "hidden",
+      !hasSelection || !hasParameters
+    );
+
+    if (this.applyButton) {
+      this.applyButton.disabled =
+        !hasSelection || !hasParameters;
+    }
+
+    if (this.resetButton) {
+      this.resetButton.disabled =
+        !hasSelection || !hasParameters;
+    }
+
+    if (this.previewButton) {
+      this.previewButton.disabled = !hasSelection;
+    }
+
+    if (this.generateButton) {
+      this.generateButton.disabled = !hasSelection;
+    }
+  }
+
+  getSelected() {
+    if (
+      !this.catalog ||
+      this.selectedPlotIndex === null ||
+      !this.catalog.items?.[this.selectedPlotIndex]
+    ) {
+      return [];
+    }
+
+    const originalPlot =
+      this.catalog.items[this.selectedPlotIndex];
+
+    const selectedPlot = structuredClone(originalPlot);
+
+    const editedValues =
+      this.editedParametersByFunction[originalPlot.function];
+
+    if (editedValues && selectedPlot.parameters) {
+      Object.entries(editedValues).forEach(([key, value]) => {
+        if (selectedPlot.parameters[key]) {
+          selectedPlot.parameters[key].value = value;
+        }
+      });
+    }
+
+    return [selectedPlot];
+  }
+
+  displayPreview(element) {
+    const previewContainer = this.querySelector(
+      '[data-role="charts-catalog-preview"]'
+    );
+
+    if (!previewContainer) {
+      console.warn("Preview container not found");
+      return;
+    }
+
+    previewContainer.replaceChildren();
+
+    if (!element) {
+      return;
+    }
+
+    previewContainer.appendChild(element);
+
+    requestAnimationFrame(() => {
+      if (!window.Plotly) {
+        return;
+      }
+
+      if (element.classList?.contains("js-plotly-plot")) {
+        window.Plotly.Plots.resize(element);
+      }
+
+      element
+        .querySelectorAll?.(".js-plotly-plot")
+        .forEach(plot => {
+          window.Plotly.Plots.resize(plot);
+        });
+    });
+  }
+
+  clearPreview() {
+    const previewContainer = this.querySelector(
+      '[data-role="charts-catalog-preview"]'
+    );
+
+    if (previewContainer) {
+      previewContainer.textContent = "Preview placeholder...";
+    }
+  }
+
+  attachGenAiChatDialog(chatElement) {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-genai-panel"]'
+    );
+
+    if (!chatElement || !container) {
+      console.warn("Could not attach GenAI chat dialog", {
+        chatElement,
+        container
+      });
+      return;
+    }
+
+    chatElement.style.display = "";
+    container.replaceChildren(chatElement);
+  }
+
+  displayGenAiOutput(element) {
+    const container = this.querySelector(
+      '[data-role="charts-catalog-genai-output"]'
+    );
+
+    if (!container) {
+      console.warn("GenAI output container not found");
+      return;
+    }
+
+    container.replaceChildren();
+
+    if (element) {
+      container.appendChild(element);
+    }
+  }
+}
+
+customElements.define("charts-catalog-control2",ChartsCatalogControl2);
+
+
+
+
+
 
 class QuickJS_ComboBoxSelector extends HTMLElement {
     constructor() {

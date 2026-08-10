@@ -1,5 +1,17 @@
 class ChatDialog extends HTMLElement {
 
+    /*
+    This is just the entry  + tela logo + send button 
+    but 
+    
+    it has a div: wf-chatbox-history-placeholder
+    that is hidden, where we can add the chat-history-component, 
+    and then we can show it when we want to display the history 
+    of the chat.
+
+    Otherwise, the chat-history can be displayed somewhere else 
+    */
+
     constructor() {
         super();
     }
@@ -44,7 +56,8 @@ connectedCallback() {
             <!--div id="history" class="wf-chatbox-suggestions"></div-->
             <!--div class="wf-chatbox-history"></div-->
 
-            <div class="hidden wf-chatbox-history-placeholder"></div>
+            <div class="hidden wf-chatbox-history-placeholder">
+            </div>
 
 
             <div id="busy-indicator" style="display:none;">
