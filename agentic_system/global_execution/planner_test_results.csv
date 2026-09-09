@@ -1,0 +1,3 @@
+success,id,query,expected_agent,actual_agent,user_intent
+True,query0_0,Why can a high water cut be a problem even when total liquid production remains high?,direct_answer,direct_answer,Explain why a high water cut can be problematic despite high total liquid production.
+True,query0_1,Which wells are performing badly?,results_interpreter,results_interpreter,Identify wells that are underperforming.

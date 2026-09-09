@@ -1,9 +1,13 @@
 from dataclasses import dataclass
-import sys, pprint, pandas as pd  
+import sys, pprint, pandas as pd
+
+from visualization_system.common.base_domain_tools import BaseDomainTools  
 sys.path.append('../../')
 sys.path.append('../')
 sys.path.append('./')
 import warnings
+
+
 
 from typing import Any, Dict, Generic, List, Iterable, Literal, TypeVar, Union, Optional,TypedDict
 from typing_extensions import Self
@@ -27,9 +31,10 @@ from visualization_system.visualization_backend.analyst.analyst_system import SQ
 
 from visualization_system.visualization_backend.analyst.prompts import visualization_planner_prompt3 
 from visualization_system.visualization_backend.analyst.prompts import anayst_prompt_template 
-from visualization_system.visualization_backend.analyst.prompts import chart_agent_prompt
+from visualization_system.visualization_backend.analyst.prompts import presenter_preproces_and_plan_prompt
 from visualization_system.visualization_backend.analyst.prompts import small_table_prompt
-from visualization_system.visualization_backend.analyst.prompts import split_subinstructions_prompt
+from visualization_system.visualization_backend.analyst.prompts import presenter_split_subinstructions_prompt  
+
 
  
 
@@ -58,6 +63,12 @@ class TaskResult(BaseModel):
     This object separates the task output into three layers:
     cheap prompt context, raw agent-specific outputs, and normalized
     downstream-consumable data.
+
+    agent: str the name of the agent
+    instruction: str the instruction passed to the agent
+    cheap_output: the agent might return a short text, or similar to be added to context.Cheap, few tokens
+    raw_results: 
+    data_results: downstream other modules will consume these results. The  related data is here 
     """
 
     agent: str = Field(
@@ -134,7 +145,6 @@ class DataFrameResult(BaseModel):
     table_name: str
     description: str | None = None
     dataframe: Any
-
 
 class RouterState(BaseModel):
     plan: VisualizationSystemPlan
@@ -304,6 +314,36 @@ class AgentTableResponse(BaseModel):
     user_query: str = Field( description='sanitized user query')
     tables: List[TableItemAgentResponse] = Field(default=[], description="Comma-separated list of table names")
 
+
+
+class ConformanceTools(BaseDomainTools):
+
+    def __init__(self):
+        pass 
+
+    def executive_summary( self ) ->str :
+        """
+        Returns an executive summary of the simulation results 
+        """
+        return "All the sectors and wells are performing as expected"
+
+    def identify_conformance_issues(self):
+        """
+        Identifies potential waterflood conformance issues (or phenomena) such as 
+        Chanelling
+        Unsupported producers
+        Stranded injectors 
+
+        Based solely on a summary of CRM simulation results.
+        -The results must be complemented with statistics on water injection and liquid production before 
+        drawing more confident conclusions on Chanelling.
+
+        
+        """
+        return "There are no conformance issues"
+
+    
+
 class DataAnalystComponent:
     agent_name = "data_analysis"
 
@@ -312,13 +352,18 @@ class DataAnalystComponent:
             llm: Any,
             smart_data: SmartData | None = None,
             config: SQLAnalystConfig | None = None,
+            domain_tools: BaseDomainTools | None = None 
         ):
         self.llm = llm
         self._smart_data = smart_data if smart_data is not None else SmartData()
-        self.config = config if config is not None else SQLAnalystConfig()
+        self.config = config if config is not None else SQLAnalystConfig( prompt_template="dd")
 
         self.tools_object = SmartDataTools(self._smart_data)
+        self.domain_tools = domain_tools 
         self.tools = self.tools_object.get_tools()
+
+        if domain_tools:
+            self.tools = self.tools + self.domain_tools.get_agent_tools()
 
     @property
     def prompt(self) -> str:
@@ -422,6 +467,8 @@ class DataAnalystComponent:
             raw_results=raw_results,
             data_results=data_results,
         )
+
+
 
 class AggregatorComponent:
     """
@@ -595,12 +642,12 @@ class VisualizationAgenticSystem:
             "final_answer": final_answer,
         }
 
-    def run(self, user_query: str):
+    def run(self, user_query: str ,init_state:ExecutorState|None = None ):
         if self.app is None:
             self.create_graph()
             self.compile_graph()
 
-        initial_state: ExecutorState = {
+        initial_state: init_state | ExecutorState = {
             "user_query": user_query,
             "plan": None,
             "task_index_to_execute": 0,
@@ -1017,6 +1064,11 @@ class xxPresenterChartingTools:
                 "title",
             },
         }
+
+
+
+
+
 
         if tool_name not in allowed_args:
             raise ValueError(f"Unknown tool: {tool_name}")
@@ -1989,6 +2041,7 @@ class PresenterChartingTools:
             "plot_pie_chart": self.plot_pie_chart,
             "plot_scatter_chart": self.plot_scatter_chart,
             "plot_table": self.plot_table,
+            "plot_list": self.plot_list,
         }
 
         if tool_name not in plotting_tools:
@@ -2091,6 +2144,13 @@ class PresenterChartingTools:
                 "title",
             },
             "plot_table": {
+                "title",
+            },
+            "plot_list": {
+                "columns",
+                "sort_by",
+                "sort_order",
+                "limit",
                 "title",
             },
         }
@@ -2550,11 +2610,72 @@ class PresenterChartingTools:
             "config": self.plotly_config,
         }
 
+    def plot_list(
+        self,
+        df: pd.DataFrame,
+        columns: list[str] | str | None = None,
+        *,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
+        limit: int | None = None,
+        title: str | None = None,
+    ) -> dict:
+        work = df.round(2)#df.copy()
 
+        if columns is not None:
+            columns = self._as_list(columns)
+            self._validate_columns(work, columns)
+            work = work[columns]
+
+        if sort_by is not None:
+            self._validate_columns(work, [sort_by])
+
+            ascending = sort_order.lower() == "asc"
+            work = work.sort_values(sort_by, ascending=ascending)
+
+        if limit is not None:
+            work = work.head(limit)
+
+        header_values = [self.format_label(c) for c in work.columns]
+
+        cell_values = []
+        for col in work.columns:
+            s = work[col]
+
+            if pd.api.types.is_datetime64_any_dtype(s):
+                values = s.dt.strftime("%Y-%m-%d").fillna("").tolist()
+            else:
+                values = s.fillna("").astype(str).tolist()
+
+            cell_values.append(values)
+
+        return {
+            "data": [
+                {
+                    "type": "table",
+                    "header": {
+                        "values": header_values,
+                        "align": "left",
+                    },
+                    "cells": {
+                        "values": cell_values,
+                        "align": "left",
+                    },
+                }
+            ],
+            "layout": {
+                "title": {
+                    "text": self.format_label(title) or "Table"
+                },
+            },
+            "config": self.plotly_config
+        }
+
+   
 class PresenterConfig:
 
-    prompt :str = chart_agent_prompt
-    split_subinstructions_prompr: str = split_subinstructions_prompt 
+    prompt :str  = presenter_preproces_and_plan_prompt
+    split_subinstructions_prompt: str = presenter_split_subinstructions_prompt  
     small_table_prompt: str = small_table_prompt 
     
     def __init__(
@@ -3064,7 +3185,7 @@ class PresenterComponent4:
         with one available source.
         """
         messages = [
-            SystemMessage(content=self.config.split_subinstructions_prompr),
+            SystemMessage(content=self.config.split_subinstructions_prompt),
             HumanMessage(
                 content=(
                     f"INSTRUCTION\n"
@@ -3132,6 +3253,8 @@ class PresenterComponent4:
             return PresenterResponse(items=ui_items)
 
         for task_result in execution_state.get("task_results", []):
+
+            print("Processing task result from agent:", task_result)
             ui_task_items = self.process_single_task_result(
                 task_result
             )
@@ -3217,7 +3340,6 @@ class PresenterComponent4:
             },
         )
 
-
     def _run_chart_plan(
         self,
         plan: dict,
@@ -3246,7 +3368,6 @@ class PresenterComponent4:
             args=args,
         )
 
-
     def _format_label(
         self,
         name: str,
@@ -3265,6 +3386,9 @@ class PresenterComponent4:
     ) -> UIItem:
         df = data_result.dataframe
         nrows, ncols = df.shape
+
+        print("Processing dataframe result with shape:", df.shape)
+        print( df )
 
         if nrows <= 2 and ncols <= 2:
         #if nrows <= 5 and ncols <= 5:
@@ -3287,7 +3411,6 @@ class PresenterComponent4:
         )
 
         print('****chart plan****')
-        print(instruction)
         print(chart_plan)
 
 

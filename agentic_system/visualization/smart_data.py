@@ -1,0 +1,225 @@
+
+from __future__ import annotations
+from langchain_core.tools import StructuredTool, Tool
+#from StuffThatDidntWork import smart_data
+#from StuffThatDidntWork import smart_data
+#from runtime.v4.semantics.semantic_models import * 
+
+from agentic_system.common.semantic_models import * 
+#from sge .visualization_backend.analyst.semantics.semantic_models import * 
+from typing import Iterable, Union
+import duckdb
+from typing import Any, Dict
+import yaml
+import pandas as pd, numpy as np
+
+from agentic_system.visualization.catalog import Catalog
+#from visualization_system.visualization_backend.analyst.smart_data_tools  import SmartDataTools
+
+class SmartData:
+
+    def __init__(self):
+        self._catalog = Catalog() 
+        self.conn= duckdb.connect()
+
+    #def get_table_tools(self):
+    #    """
+    #    Return a SmartDataTools instance bound to this SmartData object.
+    #    Creates it lazily and reuses the same instance.
+    #    """
+    #    
+    #    smart_tools = SmartDataTools(self)
+    #    return smart_tools
+
+    #def get_tools(self):
+    #    return self.get_agent_tools()
+    
+    #def get_agent_tools(self):
+    #    """
+    #    Return a SmartDataTools instance bound to this SmartData object.
+    #    Creates it lazily and reuses the same instance.
+    #    """
+    #    
+    #    smart_tools = SmartDataTools(self)
+    #    return smart_tools.get_tools()
+
+
+    def _normalize_sql(self, sql: str) -> str:
+        lines = sql.strip().splitlines()
+        #print(lines)
+        cleaned = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("--"):
+                continue
+            cleaned.append(line)
+        return "\n".join(cleaned).strip()
+
+
+    def execute_sql( self, sql:str):#, table_description:str ):
+        """
+        materialize a table by executing sql.  
+        Args:
+            sql(str): sql quiery to execute. Must start with WITH or SELECT  
+        """
+        #print('materializing')
+        #print('sql', sql)
+        #print('description', table_description)
+        norm_sql = self._normalize_sql( sql )
+        result = self.conn.execute(norm_sql).fetchdf()
+        return result 
+
+    def clear( self ):
+        self._catalog.clear()
+        #self.conn.close()
+        #self.conn= duckdb.connect()
+        self.restart_connection()
+
+    def restart_connection( self ):
+        self.conn.close()
+        self.conn= duckdb.connect()
+
+    def clear_derived( self ):
+        derived_table_names = [
+            name
+            for name, card in self._catalog.tables.items()
+            if card.kind == 'derived'
+        ]
+
+        for name in derived_table_names:
+            try:
+                self.conn.unregister(name)
+            except duckdb.CatalogException:
+                pass
+            self._catalog.tables.pop(name, None)
+
+    def sanitize_df(self, df):
+
+        df = df.copy()
+        return df 
+    
+        # Ensure index is not problematic
+        if df.index.name is not None or not isinstance(df.index, pd.RangeIndex):
+            df = df.reset_index()
+
+        # Attempt to convert object columns
+        for col in df.columns:
+            if df[col].dtype == "object":
+                # try datetime
+                converted = pd.to_datetime(df[col], errors="ignore")
+                if not pd.api.types.is_object_dtype(converted):
+                    df[col] = converted
+                    continue
+
+                # try numeric
+                converted = pd.to_numeric(df[col], errors="ignore")
+                if not pd.api.types.is_object_dtype(converted):
+                    df[col] = converted
+
+        return df
+    
+    def set_data( self,df_dict: Dict[str,pd.DataFrame]):
+        try:
+            self.restart_connection()
+            self._catalog.set_data( df_dict )
+  
+            for name, df in df_dict.items():
+                df = self.sanitize_df(df)
+                self.conn.register(name, df)
+
+        except Exception as e:
+            print("exception", str(e))
+            self.clear()
+            raise
+
+    def init_from_data_and_models( self, df_dict: Dict[str,pd.DataFrame],table_models: List[TableCard]):
+
+        self.init_from_semantic_models( table_models )
+        self.set_data( df_dict )
+
+
+
+    #@staticmethod
+    def init_from_semantic_models( self,table_models: list[TableCard]):
+
+        #smart_data = self#, SmartData()
+        
+        try:
+            
+            known_table_models = { t.name: t for t in table_models } 
+            self._catalog.init_from_semantic_models( known_table_models )
+
+        except Exception as e:
+            print("exception", str(e))
+            self.clear()
+            raise
+
+        #return smart_data
+
+
+    @staticmethod
+    def initialize_from_named_dataframes(
+        df_dict: Dict[str, pd.DataFrame],
+        named_table_models: Dict[str, TableCard],
+    ):
+        smart_data = SmartData()
+
+        try:
+            conn = smart_data.conn
+            smart_data._catalog.initialize_from_named_dataframes(
+                df_dict,
+                named_table_models,
+            )
+
+            for name, df in df_dict.items():
+                df = smart_data.sanitize_df(df)
+                conn.register(name, df)
+
+        except Exception as e:
+            print("exception", str(e))
+            smart_data.clear()
+            raise
+
+        return smart_data
+
+    def catalog_snapshot(self, input_tables: None | str | Iterable[str] = None) -> CatalogTablesSnapshot:
+        """
+        Returns schema and description of all tables (base and derived) in the database
+        """
+        if input_tables is None:
+            return self._catalog.snapshot()
+        if isinstance(input_tables, str):
+            card = self._catalog.tables[input_tables]
+            return self._catalog.snapshot(card)
+        if isinstance(input_tables, Iterable):
+            cards = [self._catalog.tables[name] for name in input_tables]
+            return self._catalog.snapshot(cards)
+        raise TypeError(f"{type(input_tables).__name__} is not supported")
+    
+    def register_derived_table(self, df:pd.DataFrame, name:str, table_description:str ):
+        card = Catalog.dataframe_to_table_card( df, name, table_description, 'derived' )
+        self._catalog.register_table( card )
+        self.conn.register(name, df)
+
+    def get_table_names( self ):
+        """Returns the table names"""
+        return [name for name in self._catalog.tables ] 
+    
+    def get_tables_creation_datetime( self )-> Dict[str,str]  :
+        """Returns the creation date of each table"""
+        return { t: v.creation_date  for t,v in self._catalog.tables.items() }   # pyright: ignore[reportReturnType]
+    
+    def get_single_table_brief_description( self, table_name:str ):
+        """Returns a brief textual description of a single table"""
+        return { t: v.description  for t,v in self._catalog.tables.items() if t.lower()==table_name }  
+
+    def get_tables_brief_description( self ):
+        """Returns a brief textual description of the tables"""
+        return { t: v.description  for t,v in self._catalog.tables.items() }  
+
+    def get_table_as_df( self, table_name:str )->pd.DataFrame:
+        return self.conn.execute(f"SELECT * FROM {table_name}").fetchdf()
+
+    def get_df( self, table_name:str )->pd.DataFrame:
+        return self.get_table_as_df( table_name )
+

@@ -1,4 +1,11 @@
 
+input_data_analyst_prompt = """ """
+
+
+
+
+
+
 planner_prompt3aa = """
 You are the PLANNER AGENT. 
 You operate behind a graphical interface of a CRM application.
@@ -124,6 +131,7 @@ dependency pipeline:
 
 
 visualization_planner_prompt3 = """
+
 You are the PLANNER AGENT. 
 
 ===============================================================================
@@ -1208,6 +1216,30 @@ OUTPUT SHAPE
 }
 """
 
+
+x = """
+plot_list:
+Use for:
+- lists
+- rankings
+- top/bottom N
+- lookup results
+- entity comparisons
+
+Common examples:
+- "rank wells by oil production"
+- "show the names of the top 10 injector wells by water injection volume in 2012"
+- "list wells with water cut > 80%"
+- "which wells have declining production?"
+- "show wells in sector A"
+
+Prefer plot_list when:
+- The user asks to "list" or "rank" or "enumerate" wells 
+- The information is suited to be presented as a table instead of a chart (e.g. small tables)
+
+DO NOT EVER USE plot_list TOOL. THIS TOOL IS FORBIDDEN. 
+
+"""
 CHART_AGENT_PROMPTV4 = """
 You are a chart planning agent.
 
@@ -1218,8 +1250,9 @@ You receive:
 
 Return a JSON plan with:
 - zero or more ordered preprocess operations 
-- exactly one plot step
-
+- exactly ONE plot step. 
+- ONE plot step (see <plot_tools> below) must be in the plan regardless of whether there are or not preprocess operations
+ 
  
 PREPROCESSING
 
@@ -1350,26 +1383,6 @@ Rules:
 
 PLOT TOOLS
 
-plot_list:
-Use for:
-- lists
-- rankings
-- top/bottom N
-- lookup results
-- entity comparisons
-
-Common examples:
-- "rank wells by oil production"
-- "show the names of the top 10 injector wells by water injection volume in 2012"
-- "list wells with water cut > 80%"
-- "which wells have declining production?"
-- "show wells in sector A"
-
-Prefer plot_list when:
-- The user asks to "list" or "rank" or "enumerate" wells 
-- The information is suited to be presented as a table instead of a chart (e.g. small tables)
-
-DO NOT EVER USE THIS TOOL. THIS TOOL IS FORBIDDEN. 
 
 Args:
 {
@@ -1504,6 +1517,10 @@ OUTPUT SHAPE
 }
 """
 
+chart_agent_prompt = CHART_AGENT_PROMPTV4
+
+presenter_preproces_and_plan_prompt =  CHART_AGENT_PROMPTV4
+
 #  "reason": "<brief reason>",
 
 SMALL_TABLE_PROMPT = """
@@ -1562,8 +1579,7 @@ Important:
 """
 
 
-chart_agent_prompt = CHART_AGENT_PROMPTV4
 
 small_table_prompt = SMALL_TABLE_PROMPT
 
-split_subinstructions_prompt = TASK_PRESENTATION_ROUTER_PROMPT
+presenter_split_subinstructions_prompt = TASK_PRESENTATION_ROUTER_PROMPT

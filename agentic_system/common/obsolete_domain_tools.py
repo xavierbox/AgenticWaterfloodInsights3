@@ -6,7 +6,7 @@ from typing import Iterable
  
 import inspect
 
-class DomainToolkit:
+class obsoleteDomainToolkit:
 
     def __init__(self ):
         pass

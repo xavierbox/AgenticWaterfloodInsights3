@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='js/chat_box.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='js/chat_history.css') }}">
 
+<link rel="stylesheet" href="{{ url_for('static', filename='js/charts_catalog_control.css') }}">
+
 <style>
 
 .scrollable-page{
@@ -306,7 +308,7 @@ function addChartToDashboard( chart_info ){
 
 function initialize(){
     
-    document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme", "dark");
  
     let layout = document.getElementById('main-layout');
     let tabs = document.getElementById("tabs");

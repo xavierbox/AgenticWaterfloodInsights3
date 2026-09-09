@@ -1491,7 +1491,6 @@ customElements.define("charts-catalog-control", ChartsCatalogControl);
 
 
 
-
 class ChartsCatalogControl2 extends HTMLElement {
   constructor() {
     super();
@@ -2389,6 +2388,8 @@ bindColumnResizer() {
     }
   }
 }
+
+
 
 customElements.define("charts-catalog-control2",ChartsCatalogControl2);
 

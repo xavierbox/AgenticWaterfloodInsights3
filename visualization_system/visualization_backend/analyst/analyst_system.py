@@ -9,6 +9,7 @@ from typing_extensions import Self
 from langgraph.graph import END, StateGraph
 from langchain_core.tools import StructuredTool, Tool
 from langchain.agents import create_agent
+
 from langchain.agents.structured_output import ToolStrategy
 
 
@@ -54,7 +55,7 @@ def make_llm_calling_node(node, llm):
 @dataclass 
 class SQLAnalystConfig:
     
-    prompt_template :str = anayst_prompt_template #depends on idioms, constraints, etc.
+    prompt_template :str #= None#anayst_prompt_template #depends on idioms, constraints, etc.
     prompt: str | None = None     
 
     def build_prompt( self, few_shot_examples = None , background = None ):
@@ -67,7 +68,7 @@ class SQLAnalystConfig:
 
 
 
-class SQLAnalystTools:
+class obsoleteSQLAnalystTools:
 
     def __init__( self ):
         self.data = None 

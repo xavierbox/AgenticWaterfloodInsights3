@@ -14,7 +14,8 @@ from visualization_backend.global_models import UIState
 
 from temporal_and_aux import * 
 from visualization_system.visualization_backend.analyst.analyst_backend import * 
-
+from visualization_system.visualization_backend.analyst.analyst_backend import VisualizationAgenticSystem
+ 
 app = Flask(__name__)
 
 # these are just mocks 
@@ -60,7 +61,7 @@ def initialize_system( llm ):
     #IMPORTS
     from visualization_system.visualization_backend.analyst.semantics.semantic_models import SemanticCatalog, semantic_catalog
     from visualization_system.visualization_backend.analyst.semantics.semantic_models import idioms as all_idiom_rules
-    vis_system = AgenticSystem( llm )
+    vis_system = VisualizationAgenticSystem( llm )
 
 
     idiom = 'duckdb'
