@@ -75,8 +75,9 @@ class BaseDomainTools(Generic[TData]):
     Those methods are automatically exposed as StructuredTools.
     """
 
-    def __init__(self):
+    def __init__(self, llm = None ):
         self._data_component: TData | None = None
+        self.llm = llm 
 
 
     @property

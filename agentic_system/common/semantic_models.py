@@ -2,6 +2,16 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
 
+# not used 
+class SQLExample(BaseModel):
+    name: str = Field(description="Short name for the SQL example.")
+    purpose: str = Field(description="What this query demonstrates or answers.")
+    sql: str = Field(description="Executable SQL snippet.")
+    notes: Optional[str] = Field(
+        default=None,
+        description="Optional assumptions, caveats, or interpretation guidance."
+    )
+
   
 class Relationship(BaseModel):
     tables_involved: List[str] = Field(description="Tables participating in the relationship, typically [left_table, right_table].")
@@ -47,28 +57,6 @@ class CatalogTablesSnapshot(BaseModel):
     base_tables: Optional[List[TableCard]] = Field( default=None)
     derived_tables: Optional[List[TableCard]] = Field( default=None)
     
-
-
-
-# not used 
-class SQLExample(BaseModel):
-    name: str = Field(description="Short name for the SQL example.")
-    purpose: str = Field(description="What this query demonstrates or answers.")
-    sql: str = Field(description="Executable SQL snippet.")
-    notes: Optional[str] = Field(
-        default=None,
-        description="Optional assumptions, caveats, or interpretation guidance."
-    )
-
-
-
-
-#class LoadedTableCard( TableCard ):
-#    creation_date: Optional[str] = Field(default=None, description = "creation date_time")
-#    row_count: Optional[int] = Field(default=None, description = "number of rows")
-
-
-
 class QueryCatalogItem(BaseModel):
     id: str = Field(description="Stable identifier for the query pattern.")
     question: str = Field(description="Natural-language intent answered by the query.")
@@ -76,7 +64,6 @@ class QueryCatalogItem(BaseModel):
     sql: str = Field(description="Executable SQL query.")
     tags: List[str] = Field(default_factory=list, description="Search tags for retrieval/routing.")
     notes: Optional[str] = Field(default=None, description="Optional caveats or engine-specific guidance.")
-
 
 class SemanticCatalog(BaseModel):
     semantic_constraints: List[str] = Field(default_factory=list, description="Global semantic constraints for the domain.")
@@ -97,3 +84,6 @@ class SemanticContext(BaseModel):
     definitions: List[str] = Field(default_factory=list, description="Canonical definitions for domain terms.")
     business_rules: List[str] = Field(default_factory=list, description="Business-level rules and policies.")
     domain_knowledge: List[str] = Field(default_factory=list, description="General domain guidance and assumptions.")
+
+
+
