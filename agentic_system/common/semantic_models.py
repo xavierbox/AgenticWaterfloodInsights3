@@ -1,5 +1,19 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+
+from typing import (
+    List,
+    Optional,
+    Literal,
+    Union,
+    TypeVar,
+    Type,
+)
+
+from pathlib import Path
+
+
+PathLike = Union[str, Path]
+
 
 
 # not used 
@@ -80,10 +94,90 @@ class SQLIdiomsCatalog(BaseModel):
     dialect: str = Field(description="SQL dialect the idioms target.")
     idioms: List[SQLIdiom] = Field(default_factory=list, description="Dialect-specific SQL idioms.")
 
+
 class SemanticContext(BaseModel):
     definitions: List[str] = Field(default_factory=list, description="Canonical definitions for domain terms.")
     business_rules: List[str] = Field(default_factory=list, description="Business-level rules and policies.")
     domain_knowledge: List[str] = Field(default_factory=list, description="General domain guidance and assumptions.")
 
 
+TSemanticContext = TypeVar(
+    "TSemanticContext",
+    bound=SemanticContext,
+)
 
+
+def load_text(path: PathLike, encoding: str = "utf-8") -> str:
+    """Read a text file and return its complete contents as a string."""
+    return Path(path).read_text(encoding=encoding)
+
+
+def load_catalog_text(path: PathLike, encoding: str = "utf-8") -> str:
+    """Read a semantic-catalog JSON file without parsing it."""
+    return load_text(path, encoding)
+
+
+def load_context_text(path: PathLike, encoding: str = "utf-8") -> str:
+    """Read a semantic-context JSON file without parsing it."""
+    return load_text(path, encoding)
+
+
+def catalog_from_text(text: str) -> SemanticCatalog:
+    """Validate JSON text and return a SemanticCatalog instance."""
+    if not text or not text.strip():
+        raise ValueError("Semantic catalog text cannot be empty.")
+    return SemanticCatalog.model_validate_json(text)
+
+def catalog_from_file(path: PathLike, encoding: str = "utf-8") -> SemanticCatalog:
+    """Read, validate, and return a semantic catalog from a JSON file."""
+    return catalog_from_text(load_catalog_text(path, encoding))
+
+
+
+
+#def old_context_from_text(text: str) -> SemanticContext:
+#    """Validate JSON text and return a SemanticContext instance."""
+#    if not text or not text.strip():
+#        raise ValueError("Semantic context text cannot be empty.")
+#    return SemanticContext.model_validate_json(text)
+
+
+#def old_context_from_file(path: PathLike, encoding: str = "utf-8") -> SemanticContext:
+#    """Read, validate, and return semantic context from a JSON file."""
+#    return context_from_text(load_context_text(path, encoding))
+
+
+
+
+TSemanticContext = TypeVar(
+    "TSemanticContext",
+    bound=SemanticContext
+)
+
+
+
+def context_from_text(
+    text: str,
+    context_type: Type[TSemanticContext] = SemanticContext,
+) -> TSemanticContext:
+
+    """Validate JSON text and return a semantic context instance."""
+
+    if not text or not text.strip():
+        raise ValueError("Semantic context text cannot be empty.")
+
+    return context_type.model_validate_json(text)
+
+
+def context_from_file(
+    path: str | PathLike,
+    context_type: Type[TSemanticContext] = SemanticContext,
+    encoding: str = "utf-8",
+) -> TSemanticContext:
+
+    """Read, validate, and return a semantic context instance from JSON."""
+
+    return context_from_text(
+        load_context_text(path, encoding),
+        context_type=context_type,
+    )

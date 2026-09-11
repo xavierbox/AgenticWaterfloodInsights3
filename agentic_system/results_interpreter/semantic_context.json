@@ -1,0 +1,76 @@
+{
+  "definitions": [
+    "A producer is supported when one or more injectors have non-negligible GAIN to that producer.",
+    "An injector supports producers when it has non-negligible GAIN to one or more producers.",
+    "Injector utility is related to the sum of GAIN across the producers supported by that injector.",
+    "producer utility: The total amount of oil produced to the total amount of liquid produced.",
+    "injector efficiency: The sum of the producer utility times the gain for all producers connected to the injector",
+    "voidage replacement ratio: The total amount of oil produced to the total amount of water injected"
+    
+
+  ],
+
+  "business_rules": [
+    "GAIN < 0.05 is negligible.",
+    
+    "A high-utility injector supports one or more producers and has total GAIN across producers approaching 1 in a balanced model.",
+    
+    "Model quality must be considered when assessing confidence in producer-level interpretations.",
+    
+    "The overall objective of waterflooding is to maximize injector efficiency",
+    
+    "When needed, the total injected volume of injector i corresponds to the sum over the producers p of  (GAIN_ip times total liquid produced in producer p)",
+    
+    "The total attributable oil produced due to injection in injector i can only be approximatelly computed as sum_p( GAIN_ip * producer utility of p)"
+],
+
+  "domain_knowledge": [
+    "A producer may be supported by injection while only a small fraction of its total liquid production is due to injection.",
+    "Total producer liquid production may contain contributions from injection, primary depletion, and pressure changes.",
+    "total_allocation measures the fraction of producer liquid production attributable to all modeled injectors combined."
+    
+],
+
+  "interpretation_guidelines": [
+    "Do not simply repeat table values. Identify patterns, extremes, rankings, anomalies and combinations of metrics that provide useful interpretation.",
+    
+    "Distinguish between direct observations, model interpretations and diagnostic hypotheses. Do not present a hypothesis as a confirmed physical mechanism.",
+    
+    "For injector-focused questions, examine GAIN, injector utility, number of supported producers and the distribution of connectivity across producers.",
+    "For producer-support questions, examine number_supporting_injectors, total_allocation, PALLOCATION and the modeled injection-production contribution.",
+    
+    "A highly connected injector-producer relationship is characterized primarily by high GAIN.",
+    
+    "A fast-response relationship is characterized by low TAU.",
+    
+    "High GAIN together with low TAU should be highlighted as a strong and fast connection and may be flagged as a potential channeling candidate.",
+    
+    "Do not diagnose channeling solely from high GAIN or solely from low TAU. Prefer conclusions supported by multiple indicators.",
+    
+    "A poorly supported producer may be characterized by few or no meaningful injector connections together with low total_allocation.",
+    
+    "A well-supported producer may have several meaningful injector connections and/or a substantial fraction of its production allocated to injection.",
+    
+    "A producer whose modeled injection contribution is the largest production component should be described as injection-dominated.",
+    
+    "A producer whose depletion contribution is the largest production component should be described as depletion-dominated.",
+    
+    "A producer whose pressure contribution is the largest production component should be described as pressure-dominated.",
+    
+    "When identifying underutilized or potentially stranded injectors, look for low injector utility and few meaningful producer connections. If actual injection rate information is unavailable, describe the conclusion as low modeled utilization rather than definitively calling the injector operationally stranded.",
+    
+    "For quantities without established absolute thresholds, such as unusually large TAU, TAUP or pressure_coefficient, compare wells relative to the population in the current simulation rather than inventing fixed thresholds.",
+    
+    "Always consider simulation quality when interpreting CRM parameters. Strong connectivity or unusual parameter values associated with poorly matched producers should be reported with reduced confidence.",
+    
+    "For broad summary requests, synthesize findings across tables rather than summarizing each table independently.",
+    
+    "For a broad simulation summary, actively identify the strongest and weakest injectors, well-supported and poorly supported producers, dominant production drivers, unusual response behavior, possible diagnostic signals and model-quality issues.",
+    
+    "Prioritize findings supported by several independent metrics.",
+    
+    "Do not enumerate every producer or injector unless the user explicitly requests an exhaustive listing.",
+    
+    "Scenario evaluation, such as predicting the impact of shutting an injector or changing injection rates, is outside the scope of this interpreter."
+  ]
+}

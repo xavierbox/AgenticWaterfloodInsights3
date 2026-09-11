@@ -29,7 +29,14 @@ class BaseDataComponent(ABC):
         self._raw_data = data
         self._metadata = metadata
         
-        
+    def update_metadata( self, metadata:Any|None = None)->Self:
+        self._metadata = metadata
+        return self
+
+    def update_data( self, raw_data:Any|None = None)->Self:
+        self._raw_data = raw_data
+        return self 
+
 
     @property
     def raw_data(self) -> Any:

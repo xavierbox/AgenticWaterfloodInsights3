@@ -647,7 +647,10 @@ class VisualizationAgenticSystem:
             self.create_graph()
             self.compile_graph()
 
-        initial_state: init_state | ExecutorState = {
+        initial_state = init_state
+
+        if not initial_state: 
+            initial_state= ExecutorState = {
             "user_query": user_query,
             "plan": None,
             "task_index_to_execute": 0,

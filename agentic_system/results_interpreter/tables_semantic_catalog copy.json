@@ -1,0 +1,132 @@
+{
+  "semantic_constraints": [
+    "GAIN and PALLOCATION have different physical meanings and must not be used interchangeably.",
+    "GAIN is injector-centric: it measures the fraction of an injector's injected water recovered as liquid production at a producer.",
+    "PALLOCATION is producer-centric: it measures the fraction of a producer's liquid production attributed to a specific injector.",
+    "GAIN below 0.05 is considered negligible and must not count as meaningful injector support.",
+    "For a balanced simulation, the sum of GAIN across producers for each injector must be less than or equal to 1.",
+    "The sum of PALLOCATION across injectors for each producer must be less than or equal to 1.",
+    "Produced water fraction and produced oil fraction must sum to 1, subject to numerical tolerance."
+  ],
+  "tables": [
+    {
+      "name": "connectivity_table",
+      "description": "CRM injector-producer connectivity results. Each row represents one modeled injector-producer pair.",
+      "kind": "base",
+      "creation_date": null,
+      "row_count": null,
+      "columns": [
+        {"name": "INJECTOR", "data_type": "string", "description": "Injector well name (source).", "derived_column": false},
+        {"name": "PRODUCER", "data_type": "string", "description": "Producer well name (sink).", "derived_column": false},
+        {"name": "GAIN", "data_type": "float", "description": "Fraction of water injected by injector i that is recovered as liquid production at producer p. Denoted G_{ip}; it measures the strength of injector-to-producer support.", "derived_column": false},
+        {"name": "PALLOCATION", "data_type": "float", "description": "Producer allocation: fraction of the producer's total liquid production attributed to injection from this injector. The remainder may be attributed to other injectors, pressure changes, or primary depletion.", "derived_column": true},
+        {"name": "GAIN_CLASS", "data_type": "string", "description": "Categorical interpretation of GAIN: negligible for GAIN < 0.05, low for 0.05 <= GAIN < 0.15, moderate for 0.15 <= GAIN <= 0.70, and high for GAIN > 0.70.", "derived_column": true}
+      ],
+      "relationships": []
+    },
+    {
+      "name": "simulation_quality_table",
+      "description": "Producer-level CRM history-match quality metrics. Each row represents one producer model.",
+      "kind": "base",
+      "creation_date": null,
+      "row_count": null,
+      "columns": [
+        {"name": "PRODUCER", "data_type": "string", "description": "Producer well name.", "derived_column": false},
+        {"name": "CORRELATION", "data_type": "float", "description": "Correlation between observed and simulated liquid-production time series.", "derived_column": true},
+        {"name": "VARIANCE_RATIO", "data_type": "float", "description": "Ratio of simulated production variance to observed production variance.", "derived_column": true},
+        {"name": "QUALITY_SCORE", "data_type": "float", "description": "Composite CRM history-match quality metric from 0 to 1. Higher values indicate better model quality.", "derived_column": true},
+        {"name": "QUALITY_CLASS", "data_type": "string", "description": "Categorical interpretation of model quality: very poor below 0.40, poor from 0.40 through 0.60, good above 0.60 through 0.80, and very good above 0.80.", "derived_column": true}
+      ],
+      "relationships": []
+    },
+{
+  "name": "producer_model_table",
+  "description": "Producer-level summary of current production state, producer-specific CRM parameters, production-source decomposition, and injector support. Each row represents one producer.",
+  "kind": "base",
+  "creation_date": null,
+  "row_count": null,
+  "columns": [
+    {
+      "name": "PRODUCER",
+      "data_type": "string",
+      "description": "Producer well name.",
+      "derived_column": false
+    },
+    {
+      "name": "current_produced_water_fraction",
+      "data_type": "float",
+      "description": "Current fraction of produced liquid that is water; also called water cut.",
+      "derived_column": true
+    },
+    {
+      "name": "current_produced_oil_fraction",
+      "data_type": "float",
+      "description": "Current fraction of produced liquid that is oil.",
+      "derived_column": true
+    },
+    {
+      "name": "current_volume_liquid_produced",
+      "data_type": "float",
+      "description": "Latest observed liquid-production volume.",
+      "derived_column": true
+    },
+    {
+      "name": "current_liquid_production_due_to_depletion",
+      "data_type": "float",
+      "description": "Recent liquid production attributed by the CRM model to primary depletion.",
+      "derived_column": true
+    },
+    {
+      "name": "current_liquid_production_due_to_injection",
+      "data_type": "float",
+      "description": "Recent liquid production attributed by the CRM model to injection support.",
+      "derived_column": true
+    },
+    {
+      "name": "current_liquid_production_due_to_pressure",
+      "data_type": "float",
+      "description": "Recent liquid production attributed by the CRM-P model to bottom-hole-pressure changes.",
+      "derived_column": true
+    },
+    {
+      "name": "TAU",
+      "data_type": "float",
+      "description": "Producer-level CRM injection-response time constant. Smaller values indicate a faster modeled production response to changes in injection; larger values indicate a slower and more attenuated response.",
+      "derived_column": true
+    },
+    {
+      "name": "TAUP",
+      "data_type": "float",
+      "description": "Producer-level primary-production decline time constant. Larger values indicate a slower modeled decline of the producer's primary or depletion contribution.",
+      "derived_column": true
+    },
+    {
+      "name": "LO",
+      "data_type": "float",
+      "description": "Producer-level CRM coefficient controlling the magnitude of the modeled primary or depletion production contribution.",
+      "derived_column": true
+    },
+    {
+      "name": "pressure_coefficient",
+      "data_type": "float",
+      "description": "Producer-level CRM-P productivity coefficient representing the sensitivity of modeled liquid production to bottom-hole pressure.",
+      "derived_column": true
+    },
+    {
+      "name": "total_allocation",
+      "data_type": "float",
+      "description": "Sum of PALLOCATION over all injectors connected to this producer. Represents the fraction of the producer's liquid production attributed to modeled injection support.",
+      "derived_column": true
+    },
+    {
+      "name": "number_supporting_injectors",
+      "data_type": "integer",
+      "description": "Number of injectors with non-negligible GAIN (GAIN >= 0.05) connected to this producer.",
+      "derived_column": true
+    }
+  ],
+  "relationships": []
+}
+  ],
+  "query_catalog": null
+}
