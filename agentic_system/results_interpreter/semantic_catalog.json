@@ -65,9 +65,9 @@
       "derived_column": true
     },
     {
-      "name": "current_volume_liquid_produced",
+      "name": "current_liquid_production",
       "data_type": "float",
-      "description": "Latest observed liquid-production volume.",
+      "description": "Latest volume of liquid produced -total volume, not a fraction- ",
       "derived_column": true
     },
     {

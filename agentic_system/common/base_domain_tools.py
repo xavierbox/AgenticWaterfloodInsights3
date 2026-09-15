@@ -22,6 +22,9 @@ class BaseDataComponent(ABC):
         self._raw_data = None
         self._metadata = None
 
+
+
+
     def set_data(self, data:Any, metadata:Any|None = None ) -> None:
         """
         Set or replace the RAW domain data.

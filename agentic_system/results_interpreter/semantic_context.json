@@ -2,7 +2,7 @@
   "definitions": [
     "A producer is supported when one or more injectors have non-negligible GAIN to that producer.",
     "An injector supports producers when it has non-negligible GAIN to one or more producers.",
-    "Injector utility is related to the sum of GAIN across the producers supported by that injector.",
+    "Injector utility is the sum of GAIN across the producers supported by that injector.",
     "producer utility: The total amount of oil produced to the total amount of liquid produced.",
     "injector efficiency: The sum of the producer utility times the gain for all producers connected to the injector",
     "voidage replacement ratio: The total amount of oil produced to the total amount of water injected"

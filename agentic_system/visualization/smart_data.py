@@ -13,14 +13,27 @@ from typing import Any, Dict
 import yaml
 import pandas as pd, numpy as np
 
+from agentic_system.common.base_domain_tools import BaseDataComponent
 from agentic_system.visualization.catalog import Catalog
-#from visualization_system.visualization_backend.analyst.smart_data_tools  import SmartDataTools
+#from visualization_s0.ystem.visualization_backend.analyst.smart_data_tools  import SmartDataTools
 
-class SmartData:
+class SmartData(BaseDataComponent):
 
     def __init__(self):
         self._catalog = Catalog() 
         self.conn= duckdb.connect()
+
+    #this is the interface that we need to implement. 
+    
+    #creates the tables in the db and the metadata in the catalog
+    #set_data(self, data:Any, metadata:Any|None = None )
+
+    #Creates a default catalog.  
+    #update_metadata( self, metadata:Any|None = None)->Self:
+
+    #also touches the row count and creation date in the catalog 
+    #update_data( self, raw_data:Any|None = None)->Self
+
 
     #def get_table_tools(self):
     #    """
@@ -118,11 +131,22 @@ class SmartData:
 
         return df
     
-    def set_data( self,df_dict: Dict[str,pd.DataFrame]):
+    def set_data( self,data: Dict[str,pd.DataFrame], metadata = None):
+
+        df_dict = data 
+        super().set_data( df_dict, metadata )
+
+        if data and metadata:
+
+            self._init_from_data_and_models( data, metadata )
+            return 
+
         try:
+            
             self.restart_connection()
             self._catalog.set_data( df_dict )
-  
+            
+           
             for name, df in df_dict.items():
                 df = self.sanitize_df(df)
                 self.conn.register(name, df)
@@ -132,10 +156,15 @@ class SmartData:
             self.clear()
             raise
 
-    def init_from_data_and_models( self, df_dict: Dict[str,pd.DataFrame],table_models: List[TableCard]):
+    
+        
 
+    def _init_from_data_and_models( self, df_dict: Dict[str,pd.DataFrame],table_models: List[TableCard]):
+
+        #super().set_data(df_dict, table_models) 
+        
         self.init_from_semantic_models( table_models )
-        self.set_data( df_dict )
+        #self.set_data( df_dict )
 
 
 

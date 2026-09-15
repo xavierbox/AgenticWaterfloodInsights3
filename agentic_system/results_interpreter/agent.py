@@ -146,12 +146,12 @@ class ResultsInterpreterTools(BaseDomainTools[ResultsInterpreterData]):
         if injector_names is not None:
             df = df[df["INJECTOR"].isin(injector_names)]
 
-        return df.copy()
+        return df.to_dict(orient='records')# df.copy()
 
     def get_simulation_quality_table(
         self,
         producer_names: list[str] | None = None,
-    ) -> pd.DataFrame:
+    ) -> dict:#pd.DataFrame:
         """
         Return producer-level CRM history-match quality information.
 
@@ -182,12 +182,12 @@ class ResultsInterpreterTools(BaseDomainTools[ResultsInterpreterData]):
         if producer_names is not None:
             df = df[df["PRODUCER"].isin(producer_names)]
 
-        return df.copy()
+        return df.to_dict(orient='records')#copy()
 
     def get_producer_model_table(
         self,
         producer_names: list[str] | None = None,
-    ) -> pd.DataFrame:
+    ) -> dict:#pd.DataFrame:
         """
         Return producer-level current production and modeled-support information.
 
@@ -231,9 +231,17 @@ class ResultsInterpreterTools(BaseDomainTools[ResultsInterpreterData]):
         df = self.raw_data["producer_model_table"]
 
         if producer_names is not None:
-            df = df[df["NAME"].isin(producer_names)]
+            try:
+                df = df[df["NAME"].isin(producer_names)]
+            except:
+                pass
+            try:
+                df = df[df["PRODUCER"].isin(producer_names)]
+            except:
+                pass
+                        
 
-        return df.copy()
+        return df.to_dict(orient='records')# df.copy()
 
     def get_injector_summary(
         self,
@@ -317,11 +325,19 @@ class ResultsInterpreterTools(BaseDomainTools[ResultsInterpreterData]):
                 }
             )
 
-        return (
-            pd.DataFrame(summary_rows)
-            .sort_values("UTILITY", ascending=False)
-            .reset_index(drop=True)
-        )
+        df= pd.DataFrame(summary_rows).sort_values("UTILITY", ascending=False).reset_index(drop=True)
+        return df.to_dict( orient = 'records' )
+    
+    def excecute_sql(self, sql):
+        """
+        Execute a sql table to retrieve info from one or more tables.
+        You can use this tool for aggregations, filtering, joints and any operation supported by 
+        sql. 
+
+        """
+        print("sql", sql )
+        return "sql execution failed, use another tool."
+
 
 @dataclass 
 class ResultsInterpreterConfig( ):

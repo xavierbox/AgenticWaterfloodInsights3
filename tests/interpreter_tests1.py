@@ -52,14 +52,18 @@ def load_interpreter_data_mock():
     2	P3	0.754035	1.020565	0.833949	good
     3	P4	0.925126	1.205418	0.917859	good
     """
-    p = """
-    PRODUCER  current_produced_water_fraction  current_produced_oil_fraction  current_volume_liquid_produced  current_liquid_production_due_to_depletion  current_liquid_production_due_to_injection  current_liquid_production_due_to_pressure  pressure_coefficient  total_allocation  number_supporting_injectors  TAU  TAUP  LO
+    p = """PRODUCER current_produced_water_fraction current_produced_oil_fraction current_volume_liquid_produced current_liquid_production_due_to_depletion current_liquid_production_due_to_injection current_liquid_production_due_to_pressure pressure_coefficient total_allocation number_supporting_injectors TAU TAUP LO
     0 P1 0.72 0.28 1200.0 420.0 660.0 120.0 0.18 0.55 2 4.5 120.0 0.35
     1 P2 0.35 0.65 950.0 570.0 285.0 95.0 0.10 0.30 2 12.0 240.0 0.60
     2 P3 0.88 0.12 700.0 140.0 490.0 70.0 0.22 0.70 1 1.4 450.0 0.20
     3 P4 0.20 0.80 1500.0 1050.0 300.0 150.0 0.08 0.20 0 28.0 800.0 0.75
     """
 
+    producer_model_table = pd.read_csv(
+        io.StringIO(p),
+        sep=r"\s+",
+        index_col=0,
+    )
     # Read the string into a DataFrame
     # 'sep=r"\s+"' handles any whitespace (tabs or multiple spaces)
     # 'index_col=0' uses the first column (0, 1, 2...) as the row index
@@ -114,6 +118,8 @@ interpreter = get_default_results_intertpreter()
 interpreter.update_data( data )
 
 query = golden_questions[-1]
+query = "list the columns in the  producer model table, show what each column means. State whether the current total liquid produced is known for each producer and if thats the case, state the value"#. Then, for each producer, how much liquid volume is being produced now?"
+
 print( query )
 response = interpreter.run( query )
 

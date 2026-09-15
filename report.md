@@ -1,34 +1,48 @@
-### Summary of CRM Results
+The producers ranked by their utility (current liquid production multiplied by oil fraction) are as follows:
 
-#### Injector Support and Utility
-- **Injector I1** is the most effective injector with the highest utility (0.780). It supports **2 producers** (P1 and P2) and has the strongest connection to **P2** with a GAIN of 0.40.
-- **Injector I2** has a utility of 0.300, supporting **1 producer** (P1) with a GAIN of 0.30.
-- **Injector I3** has the lowest utility (0.151), supporting only **1 producer** (P2) with a GAIN of 0.15.
+1. **MG-0581_P**: Utility = 3966.39 (liquid production) × 0.9151 (oil fraction) = 3629.91
+2. **MG-0553_P**: Utility = 1751.17 × 0.9991 = 1750.57
+3. **MG-0567_P**: Utility = 1623.11 × 0.9907 = 1608.89
+4. **MG-0109_P**: Utility = 1967.45 × 0.3764 = 740.14
 
-#### Poorly Supported Producers
-- **Producer P3** is poorly supported, with negligible GAIN from all injectors (total allocation is very low). It has a high water cut (88%) and is primarily depletion-dominated, with a significant contribution from primary depletion (LO = 0.20) and a very low injection contribution.
-- **Producer P4** has no meaningful injector support (total allocation is effectively zero). It is pressure-dominated, with a high pressure coefficient and a large contribution from pressure changes.
+### Supporting Injectors and History Match Quality for the Top 4 Producers:
 
-#### Important Connectivity Patterns
-- **Injector I1** has the strongest connections overall, with meaningful GAIN to both P1 (0.38) and P2 (0.40). This makes it the most balanced and effective injector in the system.
-- **Injector I2** has a single meaningful connection to P1 (GAIN = 0.30).
-- **Injector I3** has a moderate connection to P2 (GAIN = 0.15) but negligible support to other producers.
+#### 1. **MG-0581_P**
+   - **Supporting Injectors**:
+     - MG-0303_I: GAIN = 0.9860 (very high)
+     - MG-0528_I: GAIN = 0.7861 (high)
+     - MG-0571_I: GAIN = 0.9883 (very high)
+   - **History Match Quality**:
+     - Correlation = 0.9438
+     - Quality Score = 0.8850 (Good)
+   - **Liquid Production**: 3966.39
+   - **Water Cut**: 8.49%
 
-#### Potential Channeling
-- No clear evidence of channeling is observed. While **I1-P2** has the highest GAIN (0.40) and a relatively fast response (TAU = 12.0 for P2), this alone is insufficient to confirm channeling. Additional diagnostics would be required.
+#### 2. **MG-0553_P**
+   - **Supporting Injectors**:
+     - MG-0013_I: GAIN = 0.9975 (very high)
+     - MG-0526_I: GAIN = 0.9975 (very high)
+   - **History Match Quality**:
+     - Correlation = 0.8909
+     - Quality Score = 0.8040 (Good)
+   - **Liquid Production**: 1751.17
+   - **Water Cut**: 0.09%
 
-#### Production Drivers
-- **Producer P1** is injection-dominated, with 50.8% of its liquid production attributed to injection from I1 and 43.2% from I2. It has a moderate water cut (72%) and a relatively fast injection response (TAU = 4.5).
-- **Producer P2** is also injection-dominated, with 46.3% of its liquid production attributed to I1 and 22.7% to I3. It has a low water cut (35%) and a slower injection response (TAU = 12.0).
-- **Producer P3** is depletion-dominated, with negligible injection support and a high water cut (88%).
-- **Producer P4** is pressure-dominated, with 80% of its liquid production attributed to pressure changes and a very low water cut (20%).
+#### 3. **MG-0567_P**
+   - **Supporting Injectors**:
+     - MG-0289_I: GAIN = 0.5973 (moderate)
+   - **History Match Quality**:
+     - Correlation = 0.9753
+     - Quality Score = 0.9801 (Excellent)
+   - **Liquid Production**: 1623.11
+   - **Water Cut**: 0.93%
 
-#### Model Quality
-- All producers have **good** simulation quality, with quality scores ranging from 0.83 to 0.92. This provides confidence in the reliability of the CRM results for interpretation.
-
-### Key Takeaways
-- **Injector I1** is the most effective and balanced injector, supporting two producers with high GAIN values.
-- **Producer P3** and **P4** are poorly supported by injection, with P3 being depletion-dominated and P4 being pressure-dominated.
-- **Producers P1 and P2** are well-supported and injection-dominated, with significant contributions from injectors I1 and I2.
-- No strong evidence of channeling is observed, but the I1-P2 connection warrants further investigation due to its high GAIN and relatively fast response.
-- The overall model quality is good, supporting confidence in the conclusions drawn from the CRM results.
+#### 4. **MG-0109_P**
+   - **Supporting Injectors**:
+     - MG-0230_I: GAIN = 0.9974 (very high)
+     - MG-0621_I: GAIN = 0.9970 (very high)
+   - **History Match Quality**:
+     - Correlation = 0.4360
+     - Quality Score = 0.5804 (Very Poor)
+   - **Liquid Production**: 1967.45
+   - **Water Cut**: 62.36%
